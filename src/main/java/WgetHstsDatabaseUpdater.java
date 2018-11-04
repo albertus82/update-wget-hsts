@@ -26,6 +26,7 @@ import org.gnu.wget.WgetHstsDatabaseEntry;
 
 import com.google.gson.Gson;
 
+import lombok.NonNull;
 import lombok.Value;
 import lombok.extern.java.Log;
 
@@ -41,34 +42,34 @@ public class WgetHstsDatabaseUpdater {
 		}
 	}
 
-	private void execute(final String destination, final String source) throws IOException {
+	private void execute(@NonNull final String destination, @NonNull final String source) throws IOException {
 		final SourceFile sourceFile = retrieveSourceFile(source);
 		System.out.printf("Parsing source file '%s'... ", sourceFile.getFile());
-		final Map<String, ChromiumHstsPreloadedEntry> hstsPreloadedMap = parseHstsPreloadedList(sourceFile.getFile());
+		final Map<String, ChromiumHstsPreloadedEntry> preloadedEntryMap = parseHstsPreloadedList(sourceFile.getFile());
 		if (sourceFile.isTemp()) {
 			sourceFile.getFile().delete();
 		}
-		System.out.printf("%d entries found.%n", hstsPreloadedMap.size());
+		System.out.printf("%d entries found.%n", preloadedEntryMap.size());
 
 		final File destinationFile = new File(destination);
 		final Map<String, WgetHstsDatabaseEntry> existingEntryMap;
 		final Set<String> hostsToRemove;
-		if (!destinationFile.exists()) {
-			existingEntryMap = Collections.emptyMap();
-			hostsToRemove = Collections.emptySet();
-		}
-		else {
+		if (destinationFile.exists()) {
 			System.out.printf("Parsing destination file '%s'... ", destinationFile);
 			existingEntryMap = parseWgetHstsFile(destinationFile);
 			System.out.printf("%d entries found.%n", existingEntryMap.size());
 
 			System.out.print("Computing entries to remove... ");
-			hostsToRemove = existingEntryMap.values().parallelStream().filter(entry -> entry.getCreated() == Integer.MAX_VALUE && entry.getMaxAge() == 0 && !hstsPreloadedMap.containsKey(entry.getHostname())).map(WgetHstsDatabaseEntry::getHostname).collect(Collectors.toSet());
+			hostsToRemove = existingEntryMap.values().parallelStream().filter(entry -> entry.getCreated() == Integer.MAX_VALUE && entry.getMaxAge() == 0 && !preloadedEntryMap.containsKey(entry.getHostname())).map(WgetHstsDatabaseEntry::getHostname).collect(Collectors.toSet());
 			System.out.println(hostsToRemove.isEmpty() ? "none." : hostsToRemove.size());
+		}
+		else {
+			existingEntryMap = Collections.emptyMap();
+			hostsToRemove = Collections.emptySet();
 		}
 
 		System.out.print("Computing entries to add... ");
-		final Collection<WgetHstsDatabaseEntry> entriesToAdd = hstsPreloadedMap.values().parallelStream().filter(entry -> "force-https".equalsIgnoreCase(entry.getMode()) && !existingEntryMap.containsKey(entry.getName())).map(oe -> {
+		final Collection<WgetHstsDatabaseEntry> entriesToAdd = preloadedEntryMap.values().parallelStream().filter(entry -> "force-https".equalsIgnoreCase(entry.getMode()) && !existingEntryMap.containsKey(entry.getName())).map(oe -> {
 			final WgetHstsDatabaseEntry ne = new WgetHstsDatabaseEntry();
 			ne.setHostname(oe.getName());
 			ne.setInclSubdomains(oe.isIncludeSubdomains() || oe.isIncludeSubdomainsForPinning());
@@ -98,10 +99,10 @@ public class WgetHstsDatabaseUpdater {
 		}
 	}
 
-	private SourceFile retrieveSourceFile(final String source) throws IOException {
+	private SourceFile retrieveSourceFile(@NonNull final String source) throws IOException {
 		try {
 			final URL url = new URL(source);
-			System.out.printf("Downloading '%s'... ", source);
+			System.out.printf("Downloading '%s'... ", url);
 			final URLConnection connection = url.openConnection();
 			connection.setRequestProperty("Accept-Encoding", "gzip");
 			connection.setRequestProperty("Accept", "application/json,*/*;q=0.9");
@@ -118,7 +119,7 @@ public class WgetHstsDatabaseUpdater {
 		}
 	}
 
-	private File createTempWgetHstsFile(final File wgetHstsFile) throws IOException {
+	private File createTempWgetHstsFile(@NonNull final File wgetHstsFile) throws IOException {
 		File tempFile = new File(wgetHstsFile.getPath() + ".tmp");
 		int i = 1;
 		while (tempFile.exists()) {
@@ -127,7 +128,7 @@ public class WgetHstsDatabaseUpdater {
 		return Files.write(tempFile.toPath(), Arrays.asList("# HSTS 1.0 Known Hosts database for GNU Wget.", "# Edit at your own risk.", "# <hostname>\t<port>\t<incl. subdomains>\t<created>\t<max-age>"), StandardOpenOption.CREATE_NEW).toFile();
 	}
 
-	private File backupWgetHstsFile(final File wgetHstsFile) throws IOException {
+	private File backupWgetHstsFile(@NonNull final File wgetHstsFile) throws IOException {
 		File backupFile = new File(wgetHstsFile.getPath() + ".bak");
 		int i = 1;
 		while (backupFile.exists()) {
@@ -136,7 +137,7 @@ public class WgetHstsDatabaseUpdater {
 		return Files.copy(wgetHstsFile.toPath(), backupFile.toPath()).toFile();
 	}
 
-	private Map<String, ChromiumHstsPreloadedEntry> parseHstsPreloadedList(final File hstsPreloadedListFile) throws IOException {
+	private Map<String, ChromiumHstsPreloadedEntry> parseHstsPreloadedList(@NonNull final File hstsPreloadedListFile) throws IOException {
 		final ChromiumHstsPreloadedList root;
 		try (final FileReader fr = new FileReader(hstsPreloadedListFile); final BufferedReader br = new BufferedReader(fr)) {
 			root = new Gson().fromJson(br, ChromiumHstsPreloadedList.class);
@@ -144,7 +145,7 @@ public class WgetHstsDatabaseUpdater {
 		return root.getEntries().parallelStream().collect(Collectors.toMap(ChromiumHstsPreloadedEntry::getName, entry -> entry));
 	}
 
-	private Map<String, WgetHstsDatabaseEntry> parseWgetHstsFile(final File wgetHstsFile) throws IOException {
+	private Map<String, WgetHstsDatabaseEntry> parseWgetHstsFile(@NonNull final File wgetHstsFile) throws IOException {
 		try (final Stream<String> lines = Files.lines(wgetHstsFile.toPath())) {
 			return lines.map(String::trim).filter(line -> !line.startsWith("#")).map(line -> line.split("[\\t\\s]+")).filter(array -> array.length == 5).map(array -> {
 				final WgetHstsDatabaseEntry entry = new WgetHstsDatabaseEntry();
@@ -158,7 +159,7 @@ public class WgetHstsDatabaseUpdater {
 		}
 	}
 
-	private File createJsonTempFile(final InputStream in) throws IOException {
+	private File createJsonTempFile(@NonNull final InputStream in) throws IOException {
 		final Path path = Files.createTempFile("hsts-", ".json");
 		Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
 		final File file = path.toFile();
