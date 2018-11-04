@@ -11,9 +11,4 @@ public class WgetHstsDatabaseEntry {
 	private int created;
 	private int maxAge;
 
-	@Override
-	public String toString() {
-		return String.format("%s\t%d\t%d\t%d\t%d", hostname, port, inclSubdomains ? 1 : 0, created, maxAge);
-	}
-
 }

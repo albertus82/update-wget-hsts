@@ -19,11 +19,11 @@ import org.gnu.wget.WgetHstsDatabaseEntry;
 
 import com.google.gson.Gson;
 
-public class UpdateWgetHstsDatabase {
+public class WgetHstsDatabaseUpdater {
 
 	public static void main(final String... args) throws IOException {
 		if (args.length == 2) {
-			new UpdateWgetHstsDatabase().execute(args[0], args[1]);
+			new WgetHstsDatabaseUpdater().execute(args[0], args[1]);
 		}
 		else {
 			System.out.println("Typical usage: java -jar update-wget-hsts-database.jar ~/.wget-hsts transport_security_state_static.json");
@@ -71,7 +71,7 @@ public class UpdateWgetHstsDatabase {
 				System.out.println("Done (created backup file '" + backupFile + "').");
 			}
 			System.out.print("Collecting entries to write... ");
-			final Collection<String> lines = Stream.concat(existingEntryMap.values().stream().filter(entry -> !hostsToRemove.contains(entry.getHostname())), entriesToAdd.stream().sorted((o1, o2) -> o1.getHostname().compareTo(o2.getHostname()))).map(WgetHstsDatabaseEntry::toString).collect(Collectors.toList());
+			final Collection<String> lines = Stream.concat(existingEntryMap.values().stream().filter(entry -> !hostsToRemove.contains(entry.getHostname())), entriesToAdd.stream().sorted((o1, o2) -> o1.getHostname().compareTo(o2.getHostname()))).map(entry -> String.format("%s\t%d\t%d\t%d\t%d", entry.getHostname(), entry.getPort(), entry.isInclSubdomains() ? 1 : 0, entry.getCreated(), entry.getMaxAge())).collect(Collectors.toList());
 			System.out.println(lines.size());
 			System.out.print("Updating destination file '" + wgetHstsFile + "'... ");
 			final File tempFile = createTemporaryWgetHstsFile(wgetHstsFile);
