@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
@@ -25,6 +26,7 @@ import org.gnu.wget.WgetHstsDatabaseEntry;
 
 import com.google.gson.Gson;
 
+import lombok.Value;
 import lombok.extern.java.Log;
 
 @Log
@@ -39,22 +41,25 @@ public class WgetHstsDatabaseUpdater {
 		}
 	}
 
-	private void execute(final String destination, String source) throws IOException {
-		final File hstsPreloadedListFile = retrieveSourceFile(source);
-		System.out.printf("Parsing source file '%s'... ", hstsPreloadedListFile);
-		final Map<String, ChromiumHstsPreloadedEntry> hstsPreloadedMap = parseHstsPreloadedList(hstsPreloadedListFile);
+	private void execute(final String destination, final String source) throws IOException {
+		final SourceFile sourceFile = retrieveSourceFile(source);
+		System.out.printf("Parsing source file '%s'... ", sourceFile.getFile());
+		final Map<String, ChromiumHstsPreloadedEntry> hstsPreloadedMap = parseHstsPreloadedList(sourceFile.getFile());
+		if (sourceFile.isTemp()) {
+			sourceFile.getFile().delete();
+		}
 		System.out.printf("%d entries found.%n", hstsPreloadedMap.size());
 
-		final File wgetHstsFile = new File(destination);
+		final File destinationFile = new File(destination);
 		final Map<String, WgetHstsDatabaseEntry> existingEntryMap;
 		final Set<String> hostsToRemove;
-		if (!wgetHstsFile.exists()) {
+		if (!destinationFile.exists()) {
 			existingEntryMap = Collections.emptyMap();
 			hostsToRemove = Collections.emptySet();
 		}
 		else {
-			System.out.printf("Parsing destination file '%s'... ", wgetHstsFile);
-			existingEntryMap = parseWgetHstsFile(wgetHstsFile);
+			System.out.printf("Parsing destination file '%s'... ", destinationFile);
+			existingEntryMap = parseWgetHstsFile(destinationFile);
 			System.out.printf("%d entries found.%n", existingEntryMap.size());
 
 			System.out.print("Computing entries to remove... ");
@@ -74,18 +79,18 @@ public class WgetHstsDatabaseUpdater {
 		System.out.println(entriesToAdd.isEmpty() ? "none." : entriesToAdd.size());
 
 		if (!entriesToAdd.isEmpty() || !hostsToRemove.isEmpty()) {
-			if (wgetHstsFile.exists()) {
-				System.out.printf("Backing up existing file '%s'... ", wgetHstsFile);
-				final File backupFile = backupWgetHstsFile(wgetHstsFile);
+			if (destinationFile.exists()) {
+				System.out.printf("Backing up existing file '%s'... ", destinationFile);
+				final File backupFile = backupWgetHstsFile(destinationFile);
 				System.out.printf("created backup file '%s'.%n", backupFile);
 			}
 			System.out.print("Collecting entries to write... ");
 			final Collection<String> lines = Stream.concat(existingEntryMap.values().stream().filter(entry -> !hostsToRemove.contains(entry.getHostname())), entriesToAdd.parallelStream().sorted((o1, o2) -> o1.getHostname().compareTo(o2.getHostname()))).map(entry -> String.format("%s\t%d\t%d\t%d\t%d", entry.getHostname(), entry.getPort(), entry.isInclSubdomains() ? 1 : 0, entry.getCreated(), entry.getMaxAge())).collect(Collectors.toList());
 			System.out.println(lines.size());
-			System.out.printf("Updating destination file '%s'... ", wgetHstsFile);
-			final File tempFile = createTemporaryWgetHstsFile(wgetHstsFile);
+			System.out.printf("Updating destination file '%s'... ", destinationFile);
+			final File tempFile = createTemporaryWgetHstsFile(destinationFile);
 			Files.write(tempFile.toPath(), lines, StandardOpenOption.APPEND);
-			Files.move(tempFile.toPath(), wgetHstsFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+			Files.move(tempFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 			System.out.println("done.");
 		}
 		else {
@@ -93,7 +98,7 @@ public class WgetHstsDatabaseUpdater {
 		}
 	}
 
-	private File retrieveSourceFile(final String source) throws IOException {
+	private SourceFile retrieveSourceFile(final String source) throws IOException {
 		try {
 			final URL url = new URL(source);
 			System.out.printf("Downloading '%s'... ", source);
@@ -101,15 +106,15 @@ public class WgetHstsDatabaseUpdater {
 			connection.setRequestProperty("Accept-Encoding", "gzip");
 			connection.setRequestProperty("Accept", "application/json,*/*;q=0.9");
 			final File file;
-			try (final InputStream raw = connection.getInputStream(); final InputStream is = "gzip".equalsIgnoreCase(connection.getContentEncoding()) ? new GZIPInputStream(raw) : raw) {
-				file = createJsonFile(is, "hsts-preload.json");
+			try (final InputStream raw = connection.getInputStream(); final InputStream in = "gzip".equalsIgnoreCase(connection.getContentEncoding()) ? new GZIPInputStream(raw) : raw) {
+				file = createJsonTempFile(in);
 			}
-			System.out.printf("done, written file '%s' (%d kB).%n", file, file.length() / 1024);
-			return file;
+			System.out.printf("%d kB fetched.%n", file.length() / 1024);
+			return new SourceFile(file, true);
 		}
 		catch (final MalformedURLException e) {
 			log.log(Level.FINE, e.toString(), e);
-			return new File(source);
+			return new SourceFile(new File(source), false);
 		}
 	}
 
@@ -153,13 +158,17 @@ public class WgetHstsDatabaseUpdater {
 		}
 	}
 
-	private File createJsonFile(final InputStream in, final String fileName) throws IOException {
-		File file = new File(fileName);
-		int i = 1;
-		while (file.exists()) {
-			file = new File(fileName + "." + i++);
-		}
-		Files.copy(in, file.toPath());
+	private File createJsonTempFile(final InputStream in) throws IOException {
+		final Path path = Files.createTempFile("hsts-", ".json");
+		Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
+		final File file = path.toFile();
+		file.deleteOnExit();
 		return file;
+	}
+
+	@Value
+	private static class SourceFile {
+		File file;
+		boolean temp;
 	}
 }
