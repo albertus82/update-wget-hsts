@@ -88,7 +88,7 @@ public class WgetHstsDatabaseUpdater {
 			final Collection<String> lines = Stream.concat(existingEntryMap.values().stream().filter(entry -> !hostsToRemove.contains(entry.getHostname())), entriesToAdd.parallelStream().sorted((o1, o2) -> o1.getHostname().compareTo(o2.getHostname()))).map(entry -> String.format("%s\t%d\t%d\t%d\t%d", entry.getHostname(), entry.getPort(), entry.isInclSubdomains() ? 1 : 0, entry.getCreated(), entry.getMaxAge())).collect(Collectors.toList());
 			System.out.println(lines.size());
 			System.out.printf("Updating destination file '%s'... ", destinationFile);
-			final File tempFile = createTemporaryWgetHstsFile(destinationFile);
+			final File tempFile = createTempWgetHstsFile(destinationFile);
 			Files.write(tempFile.toPath(), lines, StandardOpenOption.APPEND);
 			Files.move(tempFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 			System.out.println("done.");
@@ -118,7 +118,7 @@ public class WgetHstsDatabaseUpdater {
 		}
 	}
 
-	private File createTemporaryWgetHstsFile(final File wgetHstsFile) throws IOException {
+	private File createTempWgetHstsFile(final File wgetHstsFile) throws IOException {
 		File tempFile = new File(wgetHstsFile.getPath() + ".tmp");
 		int i = 1;
 		while (tempFile.exists()) {
