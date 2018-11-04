@@ -12,6 +12,7 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<main.class>WgetHstsDatabaseUpdater</main.class>
+		<dependency.dir>dependency</dependency.dir>
 	</properties>
 
 	<build>
@@ -27,7 +28,7 @@
 							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							<mainClass>${main.class}</mainClass>
 							<addClasspath>true</addClasspath>
-							<classpathPrefix>dependency/</classpathPrefix>
+							<classpathPrefix>${dependency.dir}/</classpathPrefix>
 						</manifest>
 						<manifestEntries>
 							<X-Compile-Source-JDK>${maven.compiler.source}</X-Compile-Source-JDK>
@@ -49,6 +50,7 @@
 						</goals>
 						<configuration>
 							<includeScope>runtime</includeScope>
+							<outputDirectory>${project.build.directory}/${dependency.dir}</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
