@@ -30,13 +30,13 @@ public class WgetHstsDatabaseUpdater {
 		}
 	}
 
-	private void execute(final String dest, final String source) throws IOException {
+	private void execute(final String destination, final String source) throws IOException {
 		final File hstsPreloadedListFile = new File(source);
 		System.out.print("Parsing source file '" + hstsPreloadedListFile + "'... ");
 		final Map<String, ChromiumHstsPreloadedEntry> hstsPreloadedMap = parseHstsPreloadedList(hstsPreloadedListFile);
 		System.out.println(hstsPreloadedMap.size() + " entries found.");
 
-		final File wgetHstsFile = new File(dest);
+		final File wgetHstsFile = new File(destination);
 		final Map<String, WgetHstsDatabaseEntry> existingEntryMap;
 		final Set<String> hostsToRemove;
 		if (!wgetHstsFile.exists()) {
@@ -49,12 +49,12 @@ public class WgetHstsDatabaseUpdater {
 			System.out.println(existingEntryMap.size() + " entries found.");
 
 			System.out.print("Computing entries to remove... ");
-			hostsToRemove = existingEntryMap.values().stream().filter(entry -> entry.getCreated() == Integer.MAX_VALUE && entry.getMaxAge() == 0 && !hstsPreloadedMap.containsKey(entry.getHostname())).map(WgetHstsDatabaseEntry::getHostname).collect(Collectors.toSet());
+			hostsToRemove = existingEntryMap.values().parallelStream().filter(entry -> entry.getCreated() == Integer.MAX_VALUE && entry.getMaxAge() == 0 && !hstsPreloadedMap.containsKey(entry.getHostname())).map(WgetHstsDatabaseEntry::getHostname).collect(Collectors.toSet());
 			System.out.println(hostsToRemove.isEmpty() ? "none." : hostsToRemove.size());
 		}
 
 		System.out.print("Computing entries to add... ");
-		final Collection<WgetHstsDatabaseEntry> entriesToAdd = hstsPreloadedMap.values().stream().filter(entry -> "force-https".equalsIgnoreCase(entry.getMode()) && !existingEntryMap.containsKey(entry.getName())).map(oe -> {
+		final Collection<WgetHstsDatabaseEntry> entriesToAdd = hstsPreloadedMap.values().parallelStream().filter(entry -> "force-https".equalsIgnoreCase(entry.getMode()) && !existingEntryMap.containsKey(entry.getName())).map(oe -> {
 			final WgetHstsDatabaseEntry ne = new WgetHstsDatabaseEntry();
 			ne.setHostname(oe.getName());
 			ne.setInclSubdomains(oe.isIncludeSubdomains() || oe.isIncludeSubdomainsForPinning());
@@ -71,7 +71,7 @@ public class WgetHstsDatabaseUpdater {
 				System.out.println("Done (created backup file '" + backupFile + "').");
 			}
 			System.out.print("Collecting entries to write... ");
-			final Collection<String> lines = Stream.concat(existingEntryMap.values().stream().filter(entry -> !hostsToRemove.contains(entry.getHostname())), entriesToAdd.stream().sorted((o1, o2) -> o1.getHostname().compareTo(o2.getHostname()))).map(entry -> String.format("%s\t%d\t%d\t%d\t%d", entry.getHostname(), entry.getPort(), entry.isInclSubdomains() ? 1 : 0, entry.getCreated(), entry.getMaxAge())).collect(Collectors.toList());
+			final Collection<String> lines = Stream.concat(existingEntryMap.values().stream().filter(entry -> !hostsToRemove.contains(entry.getHostname())), entriesToAdd.parallelStream().sorted((o1, o2) -> o1.getHostname().compareTo(o2.getHostname()))).map(entry -> String.format("%s\t%d\t%d\t%d\t%d", entry.getHostname(), entry.getPort(), entry.isInclSubdomains() ? 1 : 0, entry.getCreated(), entry.getMaxAge())).collect(Collectors.toList());
 			System.out.println(lines.size());
 			System.out.print("Updating destination file '" + wgetHstsFile + "'... ");
 			final File tempFile = createTemporaryWgetHstsFile(wgetHstsFile);
@@ -103,10 +103,11 @@ public class WgetHstsDatabaseUpdater {
 	}
 
 	private Map<String, ChromiumHstsPreloadedEntry> parseHstsPreloadedList(final File hstsPreloadedListFile) throws IOException {
+		final ChromiumHstsPreloadedList root;
 		try (final FileReader fr = new FileReader(hstsPreloadedListFile); final BufferedReader br = new BufferedReader(fr)) {
-			final ChromiumHstsPreloadedList root = new Gson().fromJson(br, ChromiumHstsPreloadedList.class);
-			return root.getEntries().stream().collect(Collectors.toMap(ChromiumHstsPreloadedEntry::getName, entry -> entry));
+			root = new Gson().fromJson(br, ChromiumHstsPreloadedList.class);
 		}
+		return root.getEntries().parallelStream().collect(Collectors.toMap(ChromiumHstsPreloadedEntry::getName, entry -> entry));
 	}
 
 	private Map<String, WgetHstsDatabaseEntry> parseWgetHstsFile(final File wgetHstsFile) throws IOException {
