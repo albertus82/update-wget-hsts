@@ -13,11 +13,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.chromium.net.http.ChromiumHstsPreloadedEntry;
+import org.chromium.net.http.ChromiumHstsPreloadedList;
 import org.gnu.wget.WgetHstsDatabaseEntry;
 
 import com.google.gson.Gson;
-import com.googlesource.chromium.net.http.ChromiumHstsPreloadedEntry;
-import com.googlesource.chromium.net.http.ChromiumHstsPreloadedList;
 
 public class UpdateWgetHstsDatabase {
 

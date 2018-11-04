@@ -1,4 +1,4 @@
-package com.googlesource.chromium.net.http;
+package org.chromium.net.http;
 
 import java.util.List;
 
