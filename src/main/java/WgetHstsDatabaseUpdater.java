@@ -94,9 +94,6 @@ public class WgetHstsDatabaseUpdater {
 			Files.move(tempFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 			System.out.println("done.");
 		}
-		else {
-			System.out.println("No entries to write.");
-		}
 	}
 
 	private SourceFile retrieveSourceFile(@NonNull final String source) throws IOException {
