@@ -28,7 +28,7 @@ Import preloaded HTTP Strict Transport Security (HSTS) domains in Wget.
 ```sh
 git clone https://github.com/Albertus82/update-wget-hsts-database.git
 cd update-wget-hsts-database
-mvn package
+mvn clean package
 cd target
 java -jar update-wget-hsts-database.jar ~/.wget-hsts https://cs.chromium.org/codesearch/f/chromium/src/net/http/transport_security_state_static.json
 ```
