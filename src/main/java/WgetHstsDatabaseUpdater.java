@@ -70,9 +70,8 @@ public class WgetHstsDatabaseUpdater {
 
 		System.out.print("Computing entries to add... ");
 		final Collection<WgetHstsDatabaseEntry> entriesToAdd = preloadedEntryMap.values().parallelStream().filter(entry -> "force-https".equalsIgnoreCase(entry.getMode()) && !existingEntryMap.containsKey(entry.getName())).map(oe -> {
-			final WgetHstsDatabaseEntry ne = new WgetHstsDatabaseEntry();
-			ne.setHostname(oe.getName());
-			ne.setInclSubdomains(oe.isIncludeSubdomains() || oe.isIncludeSubdomainsForPinning());
+			final WgetHstsDatabaseEntry ne = new WgetHstsDatabaseEntry(oe.getName());
+			ne.setIncludeSubdomains(oe.isIncludeSubdomains() || oe.isIncludeSubdomainsForPinning());
 			ne.setCreated(Integer.MAX_VALUE);
 			ne.setMaxAge(0);
 			return ne;
@@ -86,7 +85,7 @@ public class WgetHstsDatabaseUpdater {
 				System.out.printf("created backup file '%s'.%n", backupFile);
 			}
 			System.out.print("Collecting entries to write... ");
-			final Collection<String> lines = Stream.concat(existingEntryMap.values().stream().filter(entry -> !hostsToRemove.contains(entry.getHostname())), entriesToAdd.parallelStream().sorted((o1, o2) -> o1.getHostname().compareTo(o2.getHostname()))).map(entry -> String.format("%s\t%d\t%d\t%d\t%d", entry.getHostname(), entry.getPort(), entry.isInclSubdomains() ? 1 : 0, entry.getCreated(), entry.getMaxAge())).collect(Collectors.toList());
+			final Collection<String> lines = Stream.concat(existingEntryMap.values().stream().filter(entry -> !hostsToRemove.contains(entry.getHostname())), entriesToAdd.parallelStream().sorted((o1, o2) -> o1.getHostname().compareTo(o2.getHostname()))).map(entry -> String.format("%s\t%d\t%d\t%d\t%d", entry.getHostname(), entry.getPort(), entry.isIncludeSubdomains() ? 1 : 0, entry.getCreated(), entry.getMaxAge())).collect(Collectors.toList());
 			System.out.println(lines.size());
 			System.out.printf("Updating destination file '%s'... ", destinationFile);
 			final File tempFile = createTempWgetHstsFile(destinationFile);
@@ -96,7 +95,7 @@ public class WgetHstsDatabaseUpdater {
 		}
 	}
 
-	private SourceFile retrieveSourceFile(@NonNull final String source) throws IOException {
+	private static SourceFile retrieveSourceFile(@NonNull final String source) throws IOException {
 		try {
 			final URL url = new URL(source);
 			System.out.printf("Downloading '%s'... ", url);
@@ -116,7 +115,7 @@ public class WgetHstsDatabaseUpdater {
 		}
 	}
 
-	private File createTempWgetHstsFile(@NonNull final File wgetHstsFile) throws IOException {
+	private static File createTempWgetHstsFile(@NonNull final File wgetHstsFile) throws IOException {
 		File tempFile = new File(wgetHstsFile.getPath() + ".tmp");
 		int i = 1;
 		while (tempFile.exists()) {
@@ -125,7 +124,7 @@ public class WgetHstsDatabaseUpdater {
 		return Files.write(tempFile.toPath(), Arrays.asList("# HSTS 1.0 Known Hosts database for GNU Wget.", "# Edit at your own risk.", "# <hostname>\t<port>\t<incl. subdomains>\t<created>\t<max-age>"), StandardOpenOption.CREATE_NEW).toFile();
 	}
 
-	private File backupWgetHstsFile(@NonNull final File wgetHstsFile) throws IOException {
+	private static File backupWgetHstsFile(@NonNull final File wgetHstsFile) throws IOException {
 		File backupFile = new File(wgetHstsFile.getPath() + ".bak");
 		int i = 1;
 		while (backupFile.exists()) {
@@ -134,7 +133,7 @@ public class WgetHstsDatabaseUpdater {
 		return Files.copy(wgetHstsFile.toPath(), backupFile.toPath()).toFile();
 	}
 
-	private Map<String, ChromiumHstsPreloadedEntry> parseHstsPreloadedList(@NonNull final File hstsPreloadedListFile) throws IOException {
+	private static Map<String, ChromiumHstsPreloadedEntry> parseHstsPreloadedList(@NonNull final File hstsPreloadedListFile) throws IOException {
 		final ChromiumHstsPreloadedList root;
 		try (final FileReader fr = new FileReader(hstsPreloadedListFile); final BufferedReader br = new BufferedReader(fr)) {
 			root = new Gson().fromJson(br, ChromiumHstsPreloadedList.class);
@@ -142,13 +141,12 @@ public class WgetHstsDatabaseUpdater {
 		return root.getEntries().parallelStream().collect(Collectors.toMap(ChromiumHstsPreloadedEntry::getName, entry -> entry));
 	}
 
-	private Map<String, WgetHstsDatabaseEntry> parseWgetHstsFile(@NonNull final File wgetHstsFile) throws IOException {
+	private static Map<String, WgetHstsDatabaseEntry> parseWgetHstsFile(@NonNull final File wgetHstsFile) throws IOException {
 		try (final Stream<String> lines = Files.lines(wgetHstsFile.toPath())) {
 			return lines.map(String::trim).filter(line -> !line.startsWith("#")).map(line -> line.split("[\\t\\s]+")).filter(array -> array.length == 5).map(array -> {
-				final WgetHstsDatabaseEntry entry = new WgetHstsDatabaseEntry();
-				entry.setHostname(array[0].trim());
+				final WgetHstsDatabaseEntry entry = new WgetHstsDatabaseEntry(array[0].trim());
 				entry.setPort(Integer.parseInt(array[1].trim()));
-				entry.setInclSubdomains("1".equals(array[2].trim()));
+				entry.setIncludeSubdomains("1".equals(array[2].trim()));
 				entry.setCreated(Integer.parseInt(array[3].trim()));
 				entry.setMaxAge(Integer.parseInt(array[4].trim()));
 				return entry;
@@ -156,7 +154,7 @@ public class WgetHstsDatabaseUpdater {
 		}
 	}
 
-	private File createJsonTempFile(@NonNull final InputStream in) throws IOException {
+	private static File createJsonTempFile(@NonNull final InputStream in) throws IOException {
 		final Path path = Files.createTempFile("hsts-", ".json");
 		Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
 		final File file = path.toFile();
