@@ -6,7 +6,7 @@
 
 []()
 
-Import preloaded HTTP Strict Transport Security (HSTS) domains in Wget.
+Import preloaded HTTP Strict Transport Security (HSTS) domains into GNU Wget.
 
 ## Requirements
 
