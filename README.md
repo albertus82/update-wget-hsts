@@ -2,6 +2,11 @@
 
 Import preloaded HTTP Strict Transport Security (HSTS) domains in Wget.
 
+## Requirements
+
+* Java Runtime Environment 1.8
+* Maven 3.3.x
+
 ## Build
 
 `mvn clean package`
