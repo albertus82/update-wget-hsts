@@ -1,0 +1,17 @@
+version: '{build}'
+
+clone_depth: 50
+
+matrix:
+  - platform: x86
+    JAVA_HOME: ${ProgramFiles(x86)}\Java\jdk1.8.0
+  - platform: x64
+    JAVA_HOME: $(ProgramFiles)\Java\jdk1.8.0
+
+before_build:
+  - java -Xmx32m -version
+  - javac -J-Xmx32m -version
+  - mvn -version
+
+build_script:
+- mvn package
