@@ -1,5 +1,11 @@
 # update-wget-hsts-database
 
+[![Build Status](https://travis-ci.org/Albertus82/update-wget-hsts-database.svg?branch=master)](https://travis-ci.org/Albertus82/update-wget-hsts-database)
+[![Build status](https://ci.appveyor.com/api/projects/status/github/Albertus82/update-wget-hsts-database?branch=master&svg=true)](https://ci.appveyor.com/project/Albertus82/update-wget-hsts-database)
+
+
+[]()
+
 Import preloaded HTTP Strict Transport Security (HSTS) domains in Wget.
 
 ## Requirements
