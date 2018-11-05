@@ -9,4 +9,4 @@ matrix:
     - os: osx
 
 script:
-- mvn package
+  - mvn package
