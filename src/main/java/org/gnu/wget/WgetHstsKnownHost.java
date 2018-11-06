@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.NonNull;
 
 @Data
-public class WgetHstsDatabaseEntry {
+public class WgetHstsKnownHost {
 
 	@NonNull
 	private final String hostname;
