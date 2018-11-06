@@ -1,0 +1,8 @@
+{
+  "pinsets": [],
+  "entries": [
+    { "name": "example.edu", "policy": "bulk-18-weeks", "mode": "force-https", "include_subdomains": true },
+    { "name": "example.org", "policy": "bulk-18-weeks", "mode": "force-https", "include_subdomains": true },
+    { "name": "hstspreload.org", "policy": "custom", "include_subdomains": false, "mode": "force-https" }
+  ]
+}

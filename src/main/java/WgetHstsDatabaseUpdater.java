@@ -39,7 +39,7 @@ import lombok.extern.java.Log;
 
 @Log
 public class WgetHstsDatabaseUpdater {
-	
+
 	private static final String BUILD_INFO_FILE_NAME = "/META-INF/build-info.properties";
 
 	public static void main(final String... args) throws IOException {
@@ -129,22 +129,22 @@ public class WgetHstsDatabaseUpdater {
 		}
 	}
 
-	private static Set<String> computeHostsToUpdate(@NonNull final Map<String, ChromiumHstsPreloadedEntry> chromiumHstsPreloadedEntryMap, @NonNull final Map<String, WgetHstsKnownHost> wgetHstsPreloadedHostMap) {
+	Set<String> computeHostsToUpdate(@NonNull final Map<String, ChromiumHstsPreloadedEntry> chromiumHstsPreloadedEntryMap, @NonNull final Map<String, WgetHstsKnownHost> wgetHstsPreloadedHostMap) {
 		return wgetHstsPreloadedHostMap.entrySet().stream().filter(e -> {
 			final ChromiumHstsPreloadedEntry preloadedEntry = chromiumHstsPreloadedEntryMap.get(e.getKey());
 			return preloadedEntry != null && (preloadedEntry.isIncludeSubdomains() || preloadedEntry.isIncludeSubdomainsForPinning()) != e.getValue().isIncludeSubdomains();
 		}).map(Entry::getKey).collect(Collectors.toSet());
 	}
 
-	private static Set<String> computeHostsToRemove(@NonNull final Set<String> chromiumHstsPreloadedHosts, @NonNull final Set<String> wgetHstsPreloadedHosts) {
+	Set<String> computeHostsToRemove(@NonNull final Set<String> chromiumHstsPreloadedHosts, @NonNull final Set<String> wgetHstsPreloadedHosts) {
 		return wgetHstsPreloadedHosts.stream().filter(wgetPreloadedHost -> !chromiumHstsPreloadedHosts.contains(wgetPreloadedHost)).collect(Collectors.toSet());
 	}
 
-	private static Map<String, WgetHstsKnownHost> retrieveWgetHstsPreloadedHosts(final Map<String, WgetHstsKnownHost> wgetHstsKnownHostMap) {
+	Map<String, WgetHstsKnownHost> retrieveWgetHstsPreloadedHosts(final Map<String, WgetHstsKnownHost> wgetHstsKnownHostMap) {
 		return wgetHstsKnownHostMap.entrySet().stream().filter(e -> e.getValue().getCreated() == Integer.MAX_VALUE && e.getValue().getMaxAge() == 0).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 	}
 
-	private static SourceFile retrieveSourceFile(@NonNull final String source) throws IOException {
+	SourceFile retrieveSourceFile(@NonNull final String source) throws IOException {
 		try {
 			final URL url = new URL(source);
 			System.out.printf("Downloading '%s'... ", url);
@@ -164,12 +164,12 @@ public class WgetHstsDatabaseUpdater {
 		}
 	}
 
-	private static Path createTempWgetHstsKnownHostsDatabase() throws IOException {
+	Path createTempWgetHstsKnownHostsDatabase() throws IOException {
 		final Path path = Files.createTempFile("wget-hsts-", null);
 		return Files.write(path, Arrays.asList("# HSTS 1.0 Known Hosts database for GNU Wget.", "# Edit at your own risk.", "# <hostname>\t<port>\t<incl. subdomains>\t<created>\t<max-age>"), StandardOpenOption.APPEND);
 	}
 
-	private static File backupWgetHstsKnownHostsDatabase(@NonNull final File wgetHstsFile) throws IOException {
+	File backupWgetHstsKnownHostsDatabase(@NonNull final File wgetHstsFile) throws IOException {
 		File backupFile = new File(wgetHstsFile.getPath() + ".bak");
 		int i = 1;
 		while (backupFile.exists()) {
@@ -178,7 +178,7 @@ public class WgetHstsDatabaseUpdater {
 		return Files.copy(wgetHstsFile.toPath(), backupFile.toPath()).toFile();
 	}
 
-	private static Map<String, ChromiumHstsPreloadedEntry> parseChromiumHstsPreloadedList(@NonNull final File transportSecurityStateStaticJson) throws IOException {
+	Map<String, ChromiumHstsPreloadedEntry> parseChromiumHstsPreloadedList(@NonNull final File transportSecurityStateStaticJson) throws IOException {
 		final ChromiumHstsPreloadedList root;
 		try (final FileReader fr = new FileReader(transportSecurityStateStaticJson); final BufferedReader br = new BufferedReader(fr)) {
 			root = new Gson().fromJson(br, ChromiumHstsPreloadedList.class);
@@ -186,7 +186,7 @@ public class WgetHstsDatabaseUpdater {
 		return root.getEntries().stream().collect(Collectors.toMap(ChromiumHstsPreloadedEntry::getName, e -> e));
 	}
 
-	private static Map<String, WgetHstsKnownHost> parseWgetHstsKnownHostsDatabase(@NonNull final File wgetHstsFile) throws IOException {
+	Map<String, WgetHstsKnownHost> parseWgetHstsKnownHostsDatabase(@NonNull final File wgetHstsFile) throws IOException {
 		try (final Stream<String> lines = Files.lines(wgetHstsFile.toPath())) {
 			return lines.map(String::trim).filter(l -> !l.startsWith("#")).map(l -> l.split("[\\t\\s]+")).filter(a -> a.length == 5).map(a -> WgetHstsKnownHost.builder().hostname(a[0].trim()).port(Integer.parseInt(a[1].trim())).includeSubdomains("1".equals(a[2].trim())).created(Integer.parseInt(a[3].trim())).maxAge(Integer.parseInt(a[4].trim())).build()).collect(Collectors.toMap(WgetHstsKnownHost::getHostname, e -> e, (k, v) -> {
 				throw new IllegalStateException("Duplicate key " + k);
@@ -194,7 +194,7 @@ public class WgetHstsDatabaseUpdater {
 		}
 	}
 
-	private static File createJsonTempFile(@NonNull final InputStream in) throws IOException {
+	File createJsonTempFile(@NonNull final InputStream in) throws IOException {
 		final Path path = Files.createTempFile("hsts-", ".json");
 		Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
 		final File file = path.toFile();
@@ -216,7 +216,7 @@ public class WgetHstsDatabaseUpdater {
 	}
 
 	@Value
-	private static class SourceFile {
+	static class SourceFile {
 		File file;
 		boolean temp;
 	}
