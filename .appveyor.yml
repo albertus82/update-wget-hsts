@@ -15,4 +15,4 @@ before_build:
   - mvn -version
 
 build_script:
-- mvn package
+- mvn test
