@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -38,13 +39,16 @@ import lombok.extern.java.Log;
 
 @Log
 public class WgetHstsDatabaseUpdater {
+	
+	private static final String BUILD_INFO_FILE_NAME = "/META-INF/build-info.properties";
 
 	public static void main(final String... args) throws IOException {
 		if (args.length == 2) {
 			new WgetHstsDatabaseUpdater().execute(args[0], args[1]);
 		}
 		else {
-			System.out.println("Typical usage: java -jar update-wget-hsts-database.jar ~/.wget-hsts https://cs.chromium.org/codesearch/f/chromium/src/net/http/transport_security_state_static.json");
+			final Properties buildInfo = loadBuildInfo();
+			System.out.printf("Typical usage: java -jar %s.jar ~/.wget-hsts https://cs.chromium.org/codesearch/f/chromium/src/net/http/transport_security_state_static.json%n", buildInfo.getProperty("project.artifactId"));
 		}
 	}
 
@@ -91,13 +95,7 @@ public class WgetHstsDatabaseUpdater {
 			System.out.print("Collecting entries to write... ");
 			final Path tempPath = createTempWgetHstsKnownHostsDatabase();
 			try (final FileWriter fw = new FileWriter(tempPath.toFile(), true); final BufferedWriter bw = new BufferedWriter(fw)) {
-				Stream.concat(wgetHstsKnownHostMap.values().stream().filter(e -> !hostsToRemove.contains(e.getHostname()) && !hostsToUpdate.contains(e.getHostname())), entriesToWrite.stream().map(oe -> {
-					final WgetHstsKnownHost ne = new WgetHstsKnownHost(oe.getName());
-					ne.setIncludeSubdomains(oe.isIncludeSubdomains() || oe.isIncludeSubdomainsForPinning());
-					ne.setCreated(Integer.MAX_VALUE);
-					ne.setMaxAge(0);
-					return ne;
-				}).sorted((e1, e2) -> e1.getHostname().compareTo(e2.getHostname()))).map(e -> String.format("%s\t%d\t%d\t%d\t%d", e.getHostname(), e.getPort(), e.isIncludeSubdomains() ? 1 : 0, e.getCreated(), e.getMaxAge())).forEachOrdered(l -> {
+				Stream.concat(wgetHstsKnownHostMap.values().stream().filter(e -> !hostsToRemove.contains(e.getHostname()) && !hostsToUpdate.contains(e.getHostname())), entriesToWrite.stream().map(oe -> WgetHstsKnownHost.builder().hostname(oe.getName()).includeSubdomains(oe.isIncludeSubdomains() || oe.isIncludeSubdomainsForPinning()).created(Integer.MAX_VALUE).maxAge(0).build()).sorted((e1, e2) -> e1.getHostname().compareTo(e2.getHostname()))).map(e -> String.format("%s\t%d\t%d\t%d\t%d", e.getHostname(), e.getPort(), e.isIncludeSubdomains() ? 1 : 0, e.getCreated(), e.getMaxAge())).forEachOrdered(l -> {
 					try {
 						bw.write(l);
 						bw.newLine();
@@ -131,19 +129,19 @@ public class WgetHstsDatabaseUpdater {
 		}
 	}
 
-	private static Set<String> computeHostsToUpdate(final Map<String, ChromiumHstsPreloadedEntry> chromiumHstsPreloadedEntryMap, final Map<String, WgetHstsKnownHost> currentWgetPreloadedEntryMap) {
-		return currentWgetPreloadedEntryMap.entrySet().stream().filter(e -> {
+	private static Set<String> computeHostsToUpdate(@NonNull final Map<String, ChromiumHstsPreloadedEntry> chromiumHstsPreloadedEntryMap, @NonNull final Map<String, WgetHstsKnownHost> wgetHstsPreloadedHostMap) {
+		return wgetHstsPreloadedHostMap.entrySet().stream().filter(e -> {
 			final ChromiumHstsPreloadedEntry preloadedEntry = chromiumHstsPreloadedEntryMap.get(e.getKey());
 			return preloadedEntry != null && (preloadedEntry.isIncludeSubdomains() || preloadedEntry.isIncludeSubdomainsForPinning()) != e.getValue().isIncludeSubdomains();
 		}).map(Entry::getKey).collect(Collectors.toSet());
 	}
 
-	private static Set<String> computeHostsToRemove(final Set<String> chromiumPreloadedHosts, final Set<String> wgetPreloadedHosts) {
-		return wgetPreloadedHosts.stream().filter(wgetPreloadedHost -> !chromiumPreloadedHosts.contains(wgetPreloadedHost)).collect(Collectors.toSet());
+	private static Set<String> computeHostsToRemove(@NonNull final Set<String> chromiumHstsPreloadedHosts, @NonNull final Set<String> wgetHstsPreloadedHosts) {
+		return wgetHstsPreloadedHosts.stream().filter(wgetPreloadedHost -> !chromiumHstsPreloadedHosts.contains(wgetPreloadedHost)).collect(Collectors.toSet());
 	}
 
-	private static Map<String, WgetHstsKnownHost> retrieveWgetHstsPreloadedHosts(final Map<String, WgetHstsKnownHost> currentWgetHstsEntryMap) {
-		return currentWgetHstsEntryMap.entrySet().stream().filter(e -> e.getValue().getCreated() == Integer.MAX_VALUE && e.getValue().getMaxAge() == 0).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+	private static Map<String, WgetHstsKnownHost> retrieveWgetHstsPreloadedHosts(final Map<String, WgetHstsKnownHost> wgetHstsKnownHostMap) {
+		return wgetHstsKnownHostMap.entrySet().stream().filter(e -> e.getValue().getCreated() == Integer.MAX_VALUE && e.getValue().getMaxAge() == 0).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 	}
 
 	private static SourceFile retrieveSourceFile(@NonNull final String source) throws IOException {
@@ -180,9 +178,9 @@ public class WgetHstsDatabaseUpdater {
 		return Files.copy(wgetHstsFile.toPath(), backupFile.toPath()).toFile();
 	}
 
-	private static Map<String, ChromiumHstsPreloadedEntry> parseChromiumHstsPreloadedList(@NonNull final File hstsPreloadedListFile) throws IOException {
+	private static Map<String, ChromiumHstsPreloadedEntry> parseChromiumHstsPreloadedList(@NonNull final File transportSecurityStateStaticJson) throws IOException {
 		final ChromiumHstsPreloadedList root;
-		try (final FileReader fr = new FileReader(hstsPreloadedListFile); final BufferedReader br = new BufferedReader(fr)) {
+		try (final FileReader fr = new FileReader(transportSecurityStateStaticJson); final BufferedReader br = new BufferedReader(fr)) {
 			root = new Gson().fromJson(br, ChromiumHstsPreloadedList.class);
 		}
 		return root.getEntries().stream().collect(Collectors.toMap(ChromiumHstsPreloadedEntry::getName, e -> e));
@@ -190,14 +188,7 @@ public class WgetHstsDatabaseUpdater {
 
 	private static Map<String, WgetHstsKnownHost> parseWgetHstsKnownHostsDatabase(@NonNull final File wgetHstsFile) throws IOException {
 		try (final Stream<String> lines = Files.lines(wgetHstsFile.toPath())) {
-			return lines.map(String::trim).filter(l -> !l.startsWith("#")).map(l -> l.split("[\\t\\s]+")).filter(a -> a.length == 5).map(a -> {
-				final WgetHstsKnownHost e = new WgetHstsKnownHost(a[0].trim());
-				e.setPort(Integer.parseInt(a[1].trim()));
-				e.setIncludeSubdomains("1".equals(a[2].trim()));
-				e.setCreated(Integer.parseInt(a[3].trim()));
-				e.setMaxAge(Integer.parseInt(a[4].trim()));
-				return e;
-			}).collect(Collectors.toMap(WgetHstsKnownHost::getHostname, e -> e, (k, v) -> {
+			return lines.map(String::trim).filter(l -> !l.startsWith("#")).map(l -> l.split("[\\t\\s]+")).filter(a -> a.length == 5).map(a -> WgetHstsKnownHost.builder().hostname(a[0].trim()).port(Integer.parseInt(a[1].trim())).includeSubdomains("1".equals(a[2].trim())).created(Integer.parseInt(a[3].trim())).maxAge(Integer.parseInt(a[4].trim())).build()).collect(Collectors.toMap(WgetHstsKnownHost::getHostname, e -> e, (k, v) -> {
 				throw new IllegalStateException("Duplicate key " + k);
 			}, LinkedHashMap::new));
 		}
@@ -209,6 +200,19 @@ public class WgetHstsDatabaseUpdater {
 		final File file = path.toFile();
 		file.deleteOnExit();
 		return file;
+	}
+
+	private static Properties loadBuildInfo() {
+		final Properties properties = new Properties();
+		try (final InputStream is = WgetHstsDatabaseUpdater.class.getResourceAsStream(BUILD_INFO_FILE_NAME)) {
+			if (is != null) {
+				properties.load(is);
+			}
+		}
+		catch (final Exception e) {
+			log.log(Level.SEVERE, "Errore durante la lettura del file classpath:" + BUILD_INFO_FILE_NAME, e);
+		}
+		return properties;
 	}
 
 	@Value

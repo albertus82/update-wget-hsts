@@ -12,11 +12,18 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<main.class>WgetHstsDatabaseUpdater</main.class>
-		<dependency.dir>dependency</dependency.dir>
+		<dependency.dir>lib</dependency.dir>
+		<build.timestamp>${maven.build.timestamp}</build.timestamp>
 	</properties>
 
 	<build>
 		<finalName>${project.artifactId}</finalName>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -70,12 +77,12 @@
 			<artifactId>gson</artifactId>
 			<version>2.8.5</version>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.github.stefanbirkner</groupId>
 			<artifactId>system-rules</artifactId>
 			<version>1.18.0</version>
 			<scope>test</scope>
-		</dependency>
+		</dependency> -->
 	</dependencies>
 
 </project>
