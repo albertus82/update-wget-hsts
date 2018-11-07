@@ -1,8 +1,13 @@
 {
   "pinsets": [],
   "entries": [
-    { "name": "example.edu", "policy": "bulk-18-weeks", "mode": "force-https", "include_subdomains": true },
-    { "name": "example.org", "policy": "bulk-18-weeks", "mode": "force-https", "include_subdomains": true },
-    { "name": "hstspreload.org", "policy": "custom", "include_subdomains": false, "mode": "force-https" }
+    { "name": "pre.https.sub.1", "policy": "bulk-18-weeks", "mode": "force-https", "include_subdomains": true },
+    { "name": "pre.https.sub.2", "policy": "bulk-18-weeks", "mode": "force-https", "include_subdomains": true },
+    { "name": "pre.https.sub.3", "policy": "custom", "include_subdomains": false, "mode": "force-https" },
+    { "name": "pre.https.nosub.1", "policy": "bulk-18-weeks", "mode": "force-https", "include_subdomains": false },
+    { "name": "pre.https.nosub.2", "policy": "bulk-18-weeks", "mode": "force-https", "include_subdomains": false },
+    { "name": "pre.nohttps.nosub.1", "policy": "bulk-18-weeks", "include_subdomains": false },
+    { "name": "pre.tobe.updated.1", "policy": "bulk-18-weeks", "mode": "force-https", "include_subdomains": true },
+    { "name": "pre.tobe.updated.2", "policy": "bulk-18-weeks", "mode": "force-https", "include_subdomains": false }
   ]
 }

@@ -30,10 +30,16 @@ public class WgetHstsDatabaseUpdaterTest {
 		final Path tempFile = createTempFileFromResource("/transport_security_state_static.json");
 		final Map<String, ChromiumHstsPreloadedEntry> x = o.parseChromiumHstsPreloadedList(tempFile.toFile());
 		Files.delete(tempFile);
-		Assert.assertEquals(3, x.size());
-		Assert.assertTrue(x.containsKey("example.edu"));
-		Assert.assertTrue(x.containsKey("example.org"));
-		Assert.assertTrue(x.containsKey("hstspreload.org"));
+		Assert.assertEquals(8, x.size());
+		Assert.assertTrue(x.containsKey("pre.https.sub.1"));
+		Assert.assertTrue(x.containsKey("pre.https.sub.2"));
+		Assert.assertTrue(x.containsKey("pre.https.sub.3"));
+		Assert.assertTrue(x.containsKey("pre.https.nosub.1"));
+		Assert.assertTrue(x.containsKey("pre.https.nosub.2"));
+		Assert.assertTrue(x.containsKey("pre.nohttps.nosub.1"));
+		Assert.assertTrue(x.containsKey("pre.tobe.updated.1"));
+		Assert.assertTrue(x.containsKey("pre.tobe.updated.2"));
+
 	}
 
 	@Test
@@ -41,11 +47,19 @@ public class WgetHstsDatabaseUpdaterTest {
 		final Path tempFile = createTempFileFromResource("/wget-hsts");
 		final Map<String, WgetHstsKnownHost> x = o.parseWgetHstsKnownHostsDatabase(tempFile.toFile());
 		Files.delete(tempFile);
-		Assert.assertEquals(4, x.size());
-		Assert.assertTrue(x.containsKey("example.com"));
-		Assert.assertTrue(x.containsKey("example.net"));
-		Assert.assertTrue(x.containsKey("example.edu"));
-		Assert.assertTrue(x.containsKey("github.com"));
+		Assert.assertEquals(12, x.size());
+		Assert.assertTrue(x.containsKey("pre.https.sub.1"));
+		Assert.assertTrue(x.containsKey("pre.https.sub.2"));
+		Assert.assertTrue(x.containsKey("pre.https.nosub.1"));
+		Assert.assertTrue(x.containsKey("pre.https.nosub.2"));
+		Assert.assertTrue(x.containsKey("nopre.https.sub.1"));
+		Assert.assertTrue(x.containsKey("nopre.https.sub.2"));
+		Assert.assertTrue(x.containsKey("nopre.https.nosub.1"));
+		Assert.assertTrue(x.containsKey("nopre.https.nosub.2"));
+		Assert.assertTrue(x.containsKey("pre.tobe.updated.1"));
+		Assert.assertTrue(x.containsKey("pre.tobe.updated.2"));
+		Assert.assertTrue(x.containsKey("tobe.removed.1"));
+		Assert.assertTrue(x.containsKey("tobe.removed.2"));
 	}
 
 	@Test
@@ -54,9 +68,15 @@ public class WgetHstsDatabaseUpdaterTest {
 		final Map<String, WgetHstsKnownHost> map1 = o.parseWgetHstsKnownHostsDatabase(tempFile.toFile());
 		Files.delete(tempFile);
 		final Map<String, WgetHstsKnownHost> x = o.retrieveWgetHstsPreloadedHosts(map1);
-		Assert.assertEquals(2, x.size());
-		Assert.assertTrue(x.containsKey("example.com"));
-		Assert.assertTrue(x.containsKey("example.edu"));
+		Assert.assertEquals(8, x.size());
+		Assert.assertTrue(x.containsKey("pre.https.sub.1"));
+		Assert.assertTrue(x.containsKey("pre.https.sub.2"));
+		Assert.assertTrue(x.containsKey("pre.https.nosub.1"));
+		Assert.assertTrue(x.containsKey("pre.https.nosub.2"));
+		Assert.assertTrue(x.containsKey("pre.tobe.updated.1"));
+		Assert.assertTrue(x.containsKey("pre.tobe.updated.2"));
+		Assert.assertTrue(x.containsKey("tobe.removed.1"));
+		Assert.assertTrue(x.containsKey("tobe.removed.2"));
 	}
 
 	@Test
@@ -71,8 +91,9 @@ public class WgetHstsDatabaseUpdaterTest {
 		final Map<String, WgetHstsKnownHost> map2 = o.retrieveWgetHstsPreloadedHosts(map);
 
 		final Set<String> x = o.computeHostsToRemove(map1.keySet(), map2.keySet());
-		Assert.assertEquals(1, x.size());
-		Assert.assertTrue(x.contains("example.com"));
+		Assert.assertEquals(2, x.size());
+		Assert.assertTrue(x.contains("tobe.removed.1"));
+		Assert.assertTrue(x.contains("tobe.removed.2"));
 	}
 
 	@Test
@@ -87,8 +108,9 @@ public class WgetHstsDatabaseUpdaterTest {
 		final Map<String, WgetHstsKnownHost> map2 = o.retrieveWgetHstsPreloadedHosts(map);
 
 		final Set<String> x = o.computeHostsToUpdate(map1, map2);
-		Assert.assertEquals(1, x.size());
-		Assert.assertTrue(x.contains("example.edu"));
+		Assert.assertEquals(2, x.size());
+		Assert.assertTrue(x.contains("pre.tobe.updated.1"));
+		Assert.assertTrue(x.contains("pre.tobe.updated.2"));
 	}
 
 	@Test
