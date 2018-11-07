@@ -87,7 +87,7 @@ public class WgetHstsDatabaseUpdater {
 		}
 
 		System.out.print("Computing entries to insert... ");
-		final Collection<ChromiumHstsPreloadedEntry> entriesToWrite = chromiumHstsPreloadedEntryMap.values().stream().filter(e -> "force-https".equalsIgnoreCase(e.getMode()) && (!wgetHstsKnownHostMap.containsKey(e.getName()) || hostsToUpdate.contains(e.getName()))).collect(Collectors.toList());
+		final Collection<ChromiumHstsPreloadedEntry> entriesToWrite = computeEntriesToWrite(chromiumHstsPreloadedEntryMap, wgetHstsKnownHostMap, hostsToUpdate);
 		final int entriesToInsertCount = entriesToWrite.size() - hostsToUpdate.size();
 		System.out.println(entriesToInsertCount == 0 ? "none" : entriesToInsertCount);
 
@@ -127,6 +127,10 @@ public class WgetHstsDatabaseUpdater {
 			}
 			System.out.println("done");
 		}
+	}
+
+	Collection<ChromiumHstsPreloadedEntry> computeEntriesToWrite(final Map<String, ChromiumHstsPreloadedEntry> chromiumHstsPreloadedEntryMap, final Map<String, WgetHstsKnownHost> wgetHstsKnownHostMap, final Set<String> hostsToUpdate) {
+		return chromiumHstsPreloadedEntryMap.values().stream().filter(e -> "force-https".equalsIgnoreCase(e.getMode()) && (!wgetHstsKnownHostMap.containsKey(e.getName()) || hostsToUpdate.contains(e.getName()))).collect(Collectors.toList());
 	}
 
 	Set<String> computeHostsToUpdate(@NonNull final Map<String, ChromiumHstsPreloadedEntry> chromiumHstsPreloadedEntryMap, @NonNull final Map<String, WgetHstsKnownHost> wgetHstsPreloadedHostMap) {

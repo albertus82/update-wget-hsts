@@ -7,6 +7,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -37,15 +40,23 @@ public class WgetHstsDatabaseUpdaterTest {
 		final Path tempFile = createTempFileFromResource('/' + TRANSPORT_SECURITY_STATE_STATIC_JSON);
 		final Map<String, ChromiumHstsPreloadedEntry> x = o.parseChromiumHstsPreloadedList(tempFile.toFile());
 		Files.delete(tempFile);
-		Assert.assertEquals(8, x.size());
-		Assert.assertTrue(x.containsKey("pre.https.sub.1"));
-		Assert.assertTrue(x.containsKey("pre.https.sub.2"));
-		Assert.assertTrue(x.containsKey("pre.https.sub.3"));
-		Assert.assertTrue(x.containsKey("pre.https.nosub.1"));
-		Assert.assertTrue(x.containsKey("pre.https.nosub.2"));
-		Assert.assertTrue(x.containsKey("pre.nohttps.nosub.1"));
-		Assert.assertTrue(x.containsKey("pre.tobe.updated.1"));
-		Assert.assertTrue(x.containsKey("pre.tobe.updated.2"));
+		Assert.assertNotNull(x);
+		final List<String> l = new ArrayList<>(x.size());
+		l.add("pre.https.sub.1");
+		l.add("pre.https.sub.2");
+		l.add("pre.https.sub.9");
+		l.add("pre.https.nosub.1");
+		l.add("pre.https.nosub.2");
+		l.add("pre.https.nosub.9");
+		l.add("pre.nohttps.nosub.1");
+		l.add("pre.nohttps.nosub.2");
+		l.add("pre.tobe.updated.1");
+		l.add("pre.tobe.updated.2");
+		Assert.assertEquals(l.size(), x.size());
+		x.entrySet().forEach(e -> {
+			Assert.assertTrue(l.contains(e.getKey()));
+			Assert.assertNotNull(e.getValue());
+		});
 	}
 
 	@Test
@@ -53,19 +64,25 @@ public class WgetHstsDatabaseUpdaterTest {
 		final Path tempFile = createTempFileFromResource('/' + WGET_HSTS);
 		final Map<String, WgetHstsKnownHost> x = o.parseWgetHstsKnownHostsDatabase(tempFile.toFile());
 		Files.delete(tempFile);
-		Assert.assertEquals(12, x.size());
-		Assert.assertTrue(x.containsKey("pre.https.sub.1"));
-		Assert.assertTrue(x.containsKey("pre.https.sub.2"));
-		Assert.assertTrue(x.containsKey("pre.https.nosub.1"));
-		Assert.assertTrue(x.containsKey("pre.https.nosub.2"));
-		Assert.assertTrue(x.containsKey("nopre.https.sub.1"));
-		Assert.assertTrue(x.containsKey("nopre.https.sub.2"));
-		Assert.assertTrue(x.containsKey("nopre.https.nosub.1"));
-		Assert.assertTrue(x.containsKey("nopre.https.nosub.2"));
-		Assert.assertTrue(x.containsKey("pre.tobe.updated.1"));
-		Assert.assertTrue(x.containsKey("pre.tobe.updated.2"));
-		Assert.assertTrue(x.containsKey("tobe.removed.1"));
-		Assert.assertTrue(x.containsKey("tobe.removed.2"));
+		Assert.assertNotNull(x);
+		final List<String> l = new ArrayList<>(x.size());
+		l.add("pre.https.sub.1");
+		l.add("pre.https.sub.2");
+		l.add("pre.https.nosub.1");
+		l.add("pre.https.nosub.2");
+		l.add("nopre.https.sub.1");
+		l.add("nopre.https.sub.2");
+		l.add("nopre.https.nosub.1");
+		l.add("nopre.https.nosub.2");
+		l.add("pre.tobe.updated.1");
+		l.add("pre.tobe.updated.2");
+		l.add("tobe.removed.1");
+		l.add("tobe.removed.2");
+		Assert.assertEquals(l.size(), x.size());
+		x.entrySet().forEach(e -> {
+			Assert.assertTrue(l.contains(e.getKey()));
+			Assert.assertNotNull(e.getValue());
+		});
 	}
 
 	@Test
@@ -74,15 +91,21 @@ public class WgetHstsDatabaseUpdaterTest {
 		final Map<String, WgetHstsKnownHost> map1 = o.parseWgetHstsKnownHostsDatabase(tempFile.toFile());
 		Files.delete(tempFile);
 		final Map<String, WgetHstsKnownHost> x = o.retrieveWgetHstsPreloadedHosts(map1);
-		Assert.assertEquals(8, x.size());
-		Assert.assertTrue(x.containsKey("pre.https.sub.1"));
-		Assert.assertTrue(x.containsKey("pre.https.sub.2"));
-		Assert.assertTrue(x.containsKey("pre.https.nosub.1"));
-		Assert.assertTrue(x.containsKey("pre.https.nosub.2"));
-		Assert.assertTrue(x.containsKey("pre.tobe.updated.1"));
-		Assert.assertTrue(x.containsKey("pre.tobe.updated.2"));
-		Assert.assertTrue(x.containsKey("tobe.removed.1"));
-		Assert.assertTrue(x.containsKey("tobe.removed.2"));
+		Assert.assertNotNull(x);
+		final List<String> l = new ArrayList<>(x.size());
+		l.add("pre.https.sub.1");
+		l.add("pre.https.sub.2");
+		l.add("pre.https.nosub.1");
+		l.add("pre.https.nosub.2");
+		l.add("pre.tobe.updated.1");
+		l.add("pre.tobe.updated.2");
+		l.add("tobe.removed.1");
+		l.add("tobe.removed.2");
+		Assert.assertEquals(l.size(), x.size());
+		x.entrySet().forEach(e -> {
+			Assert.assertTrue(l.contains(e.getKey()));
+			Assert.assertNotNull(e.getValue());
+		});
 	}
 
 	@Test
@@ -97,9 +120,12 @@ public class WgetHstsDatabaseUpdaterTest {
 		final Map<String, WgetHstsKnownHost> map2 = o.retrieveWgetHstsPreloadedHosts(map);
 
 		final Set<String> x = o.computeHostsToRemove(map1.keySet(), map2.keySet());
-		Assert.assertEquals(2, x.size());
-		Assert.assertTrue(x.contains("tobe.removed.1"));
-		Assert.assertTrue(x.contains("tobe.removed.2"));
+		Assert.assertNotNull(x);
+		final List<String> l = new ArrayList<>(x.size());
+		l.add("tobe.removed.1");
+		l.add("tobe.removed.2");
+		Assert.assertEquals(l.size(), x.size());
+		x.forEach(e -> Assert.assertTrue(l.contains(e)));
 	}
 
 	@Test
@@ -114,9 +140,36 @@ public class WgetHstsDatabaseUpdaterTest {
 		final Map<String, WgetHstsKnownHost> map2 = o.retrieveWgetHstsPreloadedHosts(map);
 
 		final Set<String> x = o.computeHostsToUpdate(map1, map2);
-		Assert.assertEquals(2, x.size());
-		Assert.assertTrue(x.contains("pre.tobe.updated.1"));
-		Assert.assertTrue(x.contains("pre.tobe.updated.2"));
+		Assert.assertNotNull(x);
+		final List<String> l = new ArrayList<>(x.size());
+		l.add("pre.tobe.updated.1");
+		l.add("pre.tobe.updated.2");
+		Assert.assertEquals(l.size(), x.size());
+		x.forEach(e -> Assert.assertTrue(l.contains(e)));
+	}
+
+	@Test
+	public void testComputeEntriesToWrite() throws IOException {
+		final Path tempFile1 = createTempFileFromResource('/' + TRANSPORT_SECURITY_STATE_STATIC_JSON);
+		final Map<String, ChromiumHstsPreloadedEntry> map1 = o.parseChromiumHstsPreloadedList(tempFile1.toFile());
+		Files.delete(tempFile1);
+
+		final Path tempFile2 = createTempFileFromResource('/' + WGET_HSTS);
+		final Map<String, WgetHstsKnownHost> map2 = o.parseWgetHstsKnownHostsDatabase(tempFile2.toFile());
+		Files.delete(tempFile2);
+		final Map<String, WgetHstsKnownHost> map3 = o.retrieveWgetHstsPreloadedHosts(map2);
+
+		final Set<String> set = o.computeHostsToUpdate(map1, map3);
+
+		final Collection<ChromiumHstsPreloadedEntry> x = o.computeEntriesToWrite(map1, map2, set);
+		Assert.assertNotNull(x);
+		final List<String> l = new ArrayList<>(x.size());
+		l.add("pre.https.sub.9");
+		l.add("pre.https.nosub.9");
+		l.add("pre.tobe.updated.1");
+		l.add("pre.tobe.updated.2");
+		Assert.assertEquals(l.size(), x.size());
+		x.stream().map(ChromiumHstsPreloadedEntry::getName).forEach(e -> Assert.assertTrue(l.contains(e)));
 	}
 
 	@Test
@@ -136,6 +189,7 @@ public class WgetHstsDatabaseUpdaterTest {
 		final WgetHstsDatabaseUpdater.SourceFile x = o.retrieveSourceFile(tempFile.toString());
 		Files.delete(tempFile);
 		Assert.assertFalse(x.isTemp());
+		Assert.assertEquals(tempFile.toFile(), x.getFile());
 	}
 
 	@Test
