@@ -22,7 +22,10 @@ import lombok.extern.java.Log;
 @Log
 public class WgetHstsDatabaseUpdaterTest {
 
-	public static WgetHstsDatabaseUpdater o;
+	private static final String TRANSPORT_SECURITY_STATE_STATIC_JSON = "transport_security_state_static.json";
+	private static final String WGET_HSTS = "wget-hsts";
+
+	private static WgetHstsDatabaseUpdater o;
 
 	@BeforeClass
 	public static void beforeClass() {
@@ -31,7 +34,7 @@ public class WgetHstsDatabaseUpdaterTest {
 
 	@Test
 	public void testParseChromiumHstsPreloadedList() throws IOException {
-		final Path tempFile = createTempFileFromResource("/transport_security_state_static.json");
+		final Path tempFile = createTempFileFromResource('/' + TRANSPORT_SECURITY_STATE_STATIC_JSON);
 		final Map<String, ChromiumHstsPreloadedEntry> x = o.parseChromiumHstsPreloadedList(tempFile.toFile());
 		Files.delete(tempFile);
 		Assert.assertEquals(8, x.size());
@@ -47,7 +50,7 @@ public class WgetHstsDatabaseUpdaterTest {
 
 	@Test
 	public void testParseWgetHstsKnownHostsDatabase() throws IOException {
-		final Path tempFile = createTempFileFromResource("/wget-hsts");
+		final Path tempFile = createTempFileFromResource('/' + WGET_HSTS);
 		final Map<String, WgetHstsKnownHost> x = o.parseWgetHstsKnownHostsDatabase(tempFile.toFile());
 		Files.delete(tempFile);
 		Assert.assertEquals(12, x.size());
@@ -67,7 +70,7 @@ public class WgetHstsDatabaseUpdaterTest {
 
 	@Test
 	public void testRetrieveWgetHstsPreloadedHosts() throws IOException {
-		final Path tempFile = createTempFileFromResource("/wget-hsts");
+		final Path tempFile = createTempFileFromResource('/' + WGET_HSTS);
 		final Map<String, WgetHstsKnownHost> map1 = o.parseWgetHstsKnownHostsDatabase(tempFile.toFile());
 		Files.delete(tempFile);
 		final Map<String, WgetHstsKnownHost> x = o.retrieveWgetHstsPreloadedHosts(map1);
@@ -84,11 +87,11 @@ public class WgetHstsDatabaseUpdaterTest {
 
 	@Test
 	public void testComputeHostsToRemove() throws IOException {
-		final Path tempFile1 = createTempFileFromResource("/transport_security_state_static.json");
+		final Path tempFile1 = createTempFileFromResource('/' + TRANSPORT_SECURITY_STATE_STATIC_JSON);
 		final Map<String, ChromiumHstsPreloadedEntry> map1 = o.parseChromiumHstsPreloadedList(tempFile1.toFile());
 		Files.delete(tempFile1);
 
-		final Path tempFile2 = createTempFileFromResource("/wget-hsts");
+		final Path tempFile2 = createTempFileFromResource('/' + WGET_HSTS);
 		final Map<String, WgetHstsKnownHost> map = o.parseWgetHstsKnownHostsDatabase(tempFile2.toFile());
 		Files.delete(tempFile2);
 		final Map<String, WgetHstsKnownHost> map2 = o.retrieveWgetHstsPreloadedHosts(map);
@@ -101,11 +104,11 @@ public class WgetHstsDatabaseUpdaterTest {
 
 	@Test
 	public void testComputeHostsToUpdate() throws IOException {
-		final Path tempFile1 = createTempFileFromResource("/transport_security_state_static.json");
+		final Path tempFile1 = createTempFileFromResource('/' + TRANSPORT_SECURITY_STATE_STATIC_JSON);
 		final Map<String, ChromiumHstsPreloadedEntry> map1 = o.parseChromiumHstsPreloadedList(tempFile1.toFile());
 		Files.delete(tempFile1);
 
-		final Path tempFile2 = createTempFileFromResource("/wget-hsts");
+		final Path tempFile2 = createTempFileFromResource('/' + WGET_HSTS);
 		final Map<String, WgetHstsKnownHost> map = o.parseWgetHstsKnownHostsDatabase(tempFile2.toFile());
 		Files.delete(tempFile2);
 		final Map<String, WgetHstsKnownHost> map2 = o.retrieveWgetHstsPreloadedHosts(map);
@@ -129,7 +132,7 @@ public class WgetHstsDatabaseUpdaterTest {
 
 	@Test
 	public void testRetrieveSourceFileLocal() throws IOException {
-		final Path tempFile = createTempFileFromResource("/transport_security_state_static.json");
+		final Path tempFile = createTempFileFromResource('/' + TRANSPORT_SECURITY_STATE_STATIC_JSON);
 		final WgetHstsDatabaseUpdater.SourceFile x = o.retrieveSourceFile(tempFile.toString());
 		Files.delete(tempFile);
 		Assert.assertFalse(x.isTemp());
@@ -137,10 +140,11 @@ public class WgetHstsDatabaseUpdaterTest {
 
 	@Test
 	public void testBackupWgetHstsKnownHostsDatabase() throws IOException {
-		final Path tempFile = createTempFileFromResource("/wget-hsts");
+		final Path tempFile = createTempFileFromResource('/' + WGET_HSTS);
 
 		final File x = o.backupWgetHstsKnownHostsDatabase(tempFile.toFile());
 		log.log(Level.INFO, "{0}", x);
+		x.deleteOnExit();
 		Assert.assertThat(x.getName(), endsWith(".bak"));
 		Assert.assertTrue(x.exists());
 		Assert.assertTrue(x.isFile());
@@ -148,6 +152,7 @@ public class WgetHstsDatabaseUpdaterTest {
 
 		final File y = o.backupWgetHstsKnownHostsDatabase(tempFile.toFile());
 		log.log(Level.INFO, "{0}", y);
+		y.deleteOnExit();
 		Assert.assertThat(y.getName(), endsWith(".bak.1"));
 		Assert.assertTrue(y.exists());
 		Assert.assertTrue(y.isFile());
@@ -155,6 +160,7 @@ public class WgetHstsDatabaseUpdaterTest {
 
 		final File z = o.backupWgetHstsKnownHostsDatabase(tempFile.toFile());
 		log.log(Level.INFO, "{0}", z);
+		z.deleteOnExit();
 		Assert.assertThat(z.getName(), endsWith(".bak.2"));
 		Assert.assertTrue(z.exists());
 		Assert.assertTrue(z.isFile());
@@ -168,11 +174,13 @@ public class WgetHstsDatabaseUpdaterTest {
 	@Test
 	public void testCreateJsonTempFile() throws IOException {
 		final File x;
-		try (final InputStream in = getClass().getResourceAsStream("/transport_security_state_static.json")) {
+		try (final InputStream in = getClass().getResourceAsStream('/' + TRANSPORT_SECURITY_STATE_STATIC_JSON)) {
 			x = o.createJsonTempFile(in);
+			log.log(Level.INFO, "{0}", x);
 			x.deleteOnExit();
 		}
-		final Path y = createTempFileFromResource("/transport_security_state_static.json");
+		final Path y = createTempFileFromResource('/' + TRANSPORT_SECURITY_STATE_STATIC_JSON);
+		Assert.assertThat(x.getName(), endsWith(".json"));
 		Assert.assertEquals(Files.size(y), x.length());
 		x.delete();
 		Files.delete(y);
