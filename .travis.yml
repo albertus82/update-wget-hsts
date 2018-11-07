@@ -12,5 +12,6 @@ matrix:
           token:
             secure: "kj9bYGQMe3InGkZWkHUww6wGAqJ2L/tSa1D4jOgyLj35HrdIEODCN/siWbK2JtIHO8quQD+yqAABOxmArfymT/nE1R3mYKtInOsruvyfq69UNtQDz0YCLc/TaZ2kfaFw4Xa3f24lguap1qS3nhBZd21uCHZk3B/mSoABqFuHHuLcunJxHdfBB/G19rBNWiBY2quCTdKVja0apqfOhJNIuR87R3ym9KZS3AOzZwVruspIy/7qvD6NsUbo9IYdO6GTD3poo19w3H6HkWNhqIqjB4ywHaIKYl0rD0YKc4DcefeahmmwAqZdzC6iBPGyIomlFO0zALjjelnsixn/Kcs0G6toqVDvameNykBl5zUXsmVOt+UG9Nsk5ixxCC27ak9rS10vmfHf35j7DAv2wz0yj7nr/OTxNRuP8mMDBITgu5gERMg4RLv91T9MVDNlJ6B7IkRud/qn0HsTm/qIdB0vySHWL2SNUd08CeYUJ8O9LMeX+K5//jvR7Jy57z+dc+S0ekMVbhQrEQMUcl2qXk0ik8pJE5/YZh8hjsGlz5n5syXROc3HIT5oMfRYBqB7ZAgEGyUftW0Z481i79Pbp0Y6YkfIzjrp/Nie6/oQm5jAjHT1nRF1jquRG4habU5g6/pLwdNPpl58qHfeGZHr/oZ80/4juqFrxagQsFUik9ElOKE="
       script:
+        - mvn test
         - sonar-scanner
     - os: osx
