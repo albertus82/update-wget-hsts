@@ -1,3 +1,7 @@
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.greaterThan;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -39,7 +43,6 @@ public class WgetHstsDatabaseUpdaterTest {
 		Assert.assertTrue(x.containsKey("pre.nohttps.nosub.1"));
 		Assert.assertTrue(x.containsKey("pre.tobe.updated.1"));
 		Assert.assertTrue(x.containsKey("pre.tobe.updated.2"));
-
 	}
 
 	@Test
@@ -116,9 +119,11 @@ public class WgetHstsDatabaseUpdaterTest {
 	@Test
 	public void testCreateTempWgetHstsKnownHostsDatabase() throws IOException {
 		final Path x = o.createTempWgetHstsKnownHostsDatabase();
+		log.log(Level.INFO, "{0}", x);
 		x.toFile().deleteOnExit();
 		Assert.assertTrue(Files.exists(x));
-		Assert.assertTrue(Files.size(x) > 0);
+		Assert.assertTrue(Files.isRegularFile(x));
+		Assert.assertThat(Files.size(x), greaterThan(0L));
 		Files.delete(x);
 	}
 
@@ -130,11 +135,54 @@ public class WgetHstsDatabaseUpdaterTest {
 		Assert.assertFalse(x.isTemp());
 	}
 
-	private static Path createTempFileFromResource(final String resourceName) throws IOException {
+	@Test
+	public void testBackupWgetHstsKnownHostsDatabase() throws IOException {
+		final Path tempFile = createTempFileFromResource("/wget-hsts");
+
+		final File x = o.backupWgetHstsKnownHostsDatabase(tempFile.toFile());
+		log.log(Level.INFO, "{0}", x);
+		Assert.assertThat(x.getName(), endsWith(".bak"));
+		Assert.assertTrue(x.exists());
+		Assert.assertTrue(x.isFile());
+		Assert.assertThat(x.length(), greaterThan(0L));
+
+		final File y = o.backupWgetHstsKnownHostsDatabase(tempFile.toFile());
+		log.log(Level.INFO, "{0}", y);
+		Assert.assertThat(y.getName(), endsWith(".bak.1"));
+		Assert.assertTrue(y.exists());
+		Assert.assertTrue(y.isFile());
+		Assert.assertThat(y.length(), greaterThan(0L));
+
+		final File z = o.backupWgetHstsKnownHostsDatabase(tempFile.toFile());
+		log.log(Level.INFO, "{0}", z);
+		Assert.assertThat(z.getName(), endsWith(".bak.2"));
+		Assert.assertTrue(z.exists());
+		Assert.assertTrue(z.isFile());
+		Assert.assertThat(z.length(), greaterThan(0L));
+
+		x.delete();
+		y.delete();
+		z.delete();
+	}
+
+	@Test
+	public void testCreateJsonTempFile() throws IOException {
+		final File x;
+		try (final InputStream in = getClass().getResourceAsStream("/transport_security_state_static.json")) {
+			x = o.createJsonTempFile(in);
+			x.deleteOnExit();
+		}
+		final Path y = createTempFileFromResource("/transport_security_state_static.json");
+		Assert.assertEquals(Files.size(y), x.length());
+		x.delete();
+		Files.delete(y);
+	}
+
+	private Path createTempFileFromResource(final String resourceName) throws IOException {
 		final Path tempFile = Files.createTempFile(null, null);
 		log.log(Level.INFO, "{0}", tempFile);
 		tempFile.toFile().deleteOnExit();
-		try (final InputStream in = WgetHstsDatabaseUpdaterTest.class.getResourceAsStream(resourceName)) {
+		try (final InputStream in = getClass().getResourceAsStream(resourceName)) {
 			Files.copy(in, tempFile, StandardCopyOption.REPLACE_EXISTING);
 		}
 		return tempFile;
