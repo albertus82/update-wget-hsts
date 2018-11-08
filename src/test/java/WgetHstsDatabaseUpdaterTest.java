@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 import org.chromium.net.http.ChromiumHstsPreloadedEntry;
 import org.gnu.wget.WgetHstsKnownHost;
@@ -223,6 +224,36 @@ public class WgetHstsDatabaseUpdaterTest {
 		x.delete();
 		y.delete();
 		z.delete();
+	}
+
+	@Test
+	public void testExecute() throws IOException {
+		final Path tempFile1 = createTempFileFromResource('/' + TRANSPORT_SECURITY_STATE_STATIC_JSON);
+		final Path tempFile2 = createTempFileFromResource('/' + WGET_HSTS);
+
+		o.execute(tempFile2.toString(), tempFile1.toString());
+
+		Files.delete(tempFile1);
+
+		final List<String> x = Files.lines(tempFile2).filter(l -> !l.startsWith("#")).map(l -> l.substring(0, l.indexOf('\t'))).collect(Collectors.toList());
+		final List<String> y = new ArrayList<>();
+		y.add("pre.https.sub.1");
+		y.add("pre.https.sub.2");
+		y.add("pre.https.nosub.1");
+		y.add("pre.https.nosub.2");
+		y.add("nopre.https.sub.1");
+		y.add("nopre.https.sub.2");
+		y.add("nopre.https.nosub.1");
+		y.add("nopre.https.nosub.2");
+		y.add("pre.https.nosub.9");
+		y.add("pre.https.sub.9");
+		y.add("pre.tobe.updated.1");
+		y.add("pre.tobe.updated.2");
+		Assert.assertEquals(x.size(), y.size());
+		Assert.assertTrue(x.containsAll(y));
+		Assert.assertTrue(y.containsAll(x));
+
+		Files.delete(tempFile2);
 	}
 
 	@Test

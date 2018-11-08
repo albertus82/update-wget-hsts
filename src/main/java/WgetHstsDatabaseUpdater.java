@@ -52,7 +52,7 @@ public class WgetHstsDatabaseUpdater {
 		}
 	}
 
-	private void execute(@NonNull final String destination, @NonNull final String source) throws IOException {
+	void execute(@NonNull final String destination, @NonNull final String source) throws IOException {
 		final SourceFile sourceFile = retrieveSourceFile(source);
 		System.out.printf("Parsing source file '%s'... ", sourceFile.getFile());
 		final Map<String, ChromiumHstsPreloadedEntry> chromiumHstsPreloadedEntryMap = parseChromiumHstsPreloadedList(sourceFile.getFile());
