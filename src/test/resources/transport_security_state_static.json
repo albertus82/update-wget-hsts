@@ -3,7 +3,7 @@
   "entries": [
     { "name": "pre.https.sub.1", "policy": "bulk-18-weeks", "mode": "force-https", "include_subdomains": true },
     { "name": "pre.https.sub.2", "policy": "bulk-18-weeks", "mode": "force-https", "include_subdomains": true },
-    { "name": "pre.https.sub.9", "policy": "custom", "include_subdomains": false, "mode": "force-https" },
+    { "name": "pre.https.sub.9", "policy": "custom", "include_subdomains": true, "mode": "force-https" },
     { "name": "pre.https.nosub.1", "policy": "bulk-18-weeks", "mode": "force-https", "include_subdomains": false },
     { "name": "pre.https.nosub.2", "policy": "bulk-18-weeks", "mode": "force-https", "include_subdomains": false },
     { "name": "pre.https.nosub.9", "policy": "bulk-18-weeks", "mode": "force-https", "include_subdomains": false },
