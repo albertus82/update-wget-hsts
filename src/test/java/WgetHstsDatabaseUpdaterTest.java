@@ -45,8 +45,11 @@ public class WgetHstsDatabaseUpdaterTest {
 	@AfterClass
 	public static void afterClass() {
 		tempFiles.forEach(f -> {
-			if (!f.delete()) {
-				log.log(WARNING, "Cannot delete file '{0}'!", f);
+			if (f.delete()) {
+				log.log(INFO, "Deleted file ''{0}''.", f);
+			}
+			else {
+				log.log(WARNING, "Cannot delete file ''{0}''!", f);
 				f.deleteOnExit();
 			}
 		});
@@ -183,7 +186,7 @@ public class WgetHstsDatabaseUpdaterTest {
 	@Test
 	public void testCreateTempWgetHstsKnownHostsDatabase() throws IOException {
 		final Path x = o.createTempWgetHstsKnownHostsDatabase();
-		log.log(INFO, "{0}", x);
+		log.log(INFO, "Created temp file ''{0}''", x);
 		tempFiles.add(x.toFile());
 		Assert.assertTrue(Files.exists(x));
 		Assert.assertTrue(Files.isRegularFile(x));
@@ -203,7 +206,7 @@ public class WgetHstsDatabaseUpdaterTest {
 		final Path tempFile = createTempFileFromResource('/' + WGET_HSTS);
 
 		final File x = o.backupWgetHstsKnownHostsDatabase(tempFile.toFile());
-		log.log(INFO, "{0}", x);
+		log.log(INFO, "Created temp file ''{0}''", x);
 		tempFiles.add(x);
 		Assert.assertThat(x.getName(), endsWith(".bak"));
 		Assert.assertTrue(x.exists());
@@ -211,7 +214,7 @@ public class WgetHstsDatabaseUpdaterTest {
 		Assert.assertThat(x.length(), greaterThan(0L));
 
 		final File y = o.backupWgetHstsKnownHostsDatabase(tempFile.toFile());
-		log.log(INFO, "{0}", y);
+		log.log(INFO, "Created temp file ''{0}''", y);
 		tempFiles.add(y);
 		Assert.assertThat(y.getName(), endsWith(".bak.1"));
 		Assert.assertTrue(y.exists());
@@ -219,7 +222,7 @@ public class WgetHstsDatabaseUpdaterTest {
 		Assert.assertThat(y.length(), greaterThan(0L));
 
 		final File z = o.backupWgetHstsKnownHostsDatabase(tempFile.toFile());
-		log.log(INFO, "{0}", z);
+		log.log(INFO, "Created temp file ''{0}''", z);
 		tempFiles.add(z);
 		Assert.assertThat(z.getName(), endsWith(".bak.2"));
 		Assert.assertTrue(z.exists());
@@ -261,7 +264,7 @@ public class WgetHstsDatabaseUpdaterTest {
 		final File x;
 		try (final InputStream in = getClass().getResourceAsStream('/' + TRANSPORT_SECURITY_STATE_STATIC_JSON)) {
 			x = o.createJsonTempFile(in);
-			log.log(INFO, "{0}", x);
+			log.log(INFO, "Created temp file ''{0}''.", x);
 			tempFiles.add(x);
 		}
 		Assert.assertThat(x.getName(), endsWith(".json"));
@@ -271,7 +274,7 @@ public class WgetHstsDatabaseUpdaterTest {
 
 	private Path createTempFileFromResource(final String resourceName) throws IOException {
 		final Path tempFile = Files.createTempFile(null, null);
-		log.log(INFO, "{0}", tempFile);
+		log.log(INFO, "Created temp file ''{0}''.", tempFile);
 		tempFiles.add(tempFile.toFile());
 		try (final InputStream in = getClass().getResourceAsStream(resourceName)) {
 			Files.copy(in, tempFile, StandardCopyOption.REPLACE_EXISTING);
