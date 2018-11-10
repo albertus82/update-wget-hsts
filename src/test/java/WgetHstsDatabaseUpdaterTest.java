@@ -240,7 +240,7 @@ public class WgetHstsDatabaseUpdaterTest {
 
 		final File backupFile = new File(tempFile2.toString() + ".bak");
 		if (backupFile.lastModified() < t) {
-			throw new IllegalStateException();
+			throw new IllegalStateException(backupFile.lastModified() + " < " + t);
 		}
 		tempFiles.add(backupFile);
 		Assert.assertTrue(Files.exists(backupFile.toPath()));
