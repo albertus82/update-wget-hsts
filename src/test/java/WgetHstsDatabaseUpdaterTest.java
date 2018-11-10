@@ -33,14 +33,13 @@ public class WgetHstsDatabaseUpdaterTest {
 	private static final String TRANSPORT_SECURITY_STATE_STATIC_JSON = "transport_security_state_static.json";
 	private static final String WGET_HSTS = "wget-hsts";
 
-	private static WgetHstsDatabaseUpdater o;
+	private static final Collection<File> tempFiles = new TreeSet<>();
 
-	private static Collection<File> tempFiles;
+	private static WgetHstsDatabaseUpdater o;
 
 	@BeforeClass
 	public static void beforeClass() {
 		o = new WgetHstsDatabaseUpdater();
-		tempFiles = new TreeSet<>();
 	}
 
 	@AfterClass
@@ -236,9 +235,13 @@ public class WgetHstsDatabaseUpdaterTest {
 		final Path tempFile1 = createTempFileFromResource('/' + TRANSPORT_SECURITY_STATE_STATIC_JSON);
 		final Path tempFile2 = createTempFileFromResource('/' + WGET_HSTS);
 
+		final long t = System.currentTimeMillis();
 		o.execute(tempFile2.toString(), tempFile1.toString());
 
 		final File backupFile = new File(tempFile2.toString() + ".bak");
+		if (backupFile.lastModified() < t) {
+			throw new IllegalStateException();
+		}
 		tempFiles.add(backupFile);
 		Assert.assertTrue(Files.exists(backupFile.toPath()));
 
