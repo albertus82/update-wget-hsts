@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.chromium.net.http.ChromiumHstsPreloadedEntry;
 import org.gnu.wget.WgetHstsKnownHost;
@@ -235,7 +236,6 @@ public class WgetHstsDatabaseUpdaterTest {
 
 		Files.delete(tempFile1);
 
-		final List<String> x = Files.lines(tempFile2).filter(l -> !l.startsWith("#")).map(l -> l.substring(0, l.indexOf('\t'))).collect(Collectors.toList());
 		final List<String> y = new ArrayList<>();
 		y.add("pre.https.sub.1");
 		y.add("pre.https.sub.2");
@@ -249,9 +249,13 @@ public class WgetHstsDatabaseUpdaterTest {
 		y.add("pre.https.sub.9");
 		y.add("pre.tobe.updated.1");
 		y.add("pre.tobe.updated.2");
-		Assert.assertEquals(x.size(), y.size());
-		Assert.assertTrue(x.containsAll(y));
-		Assert.assertTrue(y.containsAll(x));
+
+		try (final Stream<String> lines = Files.lines(tempFile2)) {
+			final List<String> x = lines.filter(l -> !l.startsWith("#")).map(l -> l.substring(0, l.indexOf('\t'))).collect(Collectors.toList());
+			Assert.assertEquals(x.size(), y.size());
+			Assert.assertTrue(x.containsAll(y));
+			Assert.assertTrue(y.containsAll(x));
+		}
 
 		Files.delete(tempFile2);
 	}
@@ -264,8 +268,8 @@ public class WgetHstsDatabaseUpdaterTest {
 			log.log(Level.INFO, "{0}", x);
 			x.deleteOnExit();
 		}
-		final Path y = createTempFileFromResource('/' + TRANSPORT_SECURITY_STATE_STATIC_JSON);
 		Assert.assertThat(x.getName(), endsWith(".json"));
+		final Path y = createTempFileFromResource('/' + TRANSPORT_SECURITY_STATE_STATIC_JSON);
 		Assert.assertEquals(Files.size(y), x.length());
 		x.delete();
 		Files.delete(y);
