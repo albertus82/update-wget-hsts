@@ -47,10 +47,10 @@ public class WgetHstsDatabaseUpdaterTest {
 	public static void afterClass() {
 		tempFiles.forEach(f -> {
 			if (f.delete()) {
-				log.log(INFO, "Deleted file ''{0}''.", f);
+				log.log(INFO, "Deleted temp file ''{0}''.", f);
 			}
 			else {
-				log.log(WARNING, "Cannot delete file ''{0}''!", f);
+				log.log(WARNING, "Cannot delete temp file ''{0}''!", f);
 				f.deleteOnExit();
 			}
 		});
