@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,7 +40,7 @@ public class WgetHstsDatabaseUpdaterTest {
 	@BeforeClass
 	public static void beforeClass() {
 		o = new WgetHstsDatabaseUpdater();
-		tempFiles = new ArrayList<>();
+		tempFiles = new TreeSet<>();
 	}
 
 	@AfterClass
@@ -236,6 +237,10 @@ public class WgetHstsDatabaseUpdaterTest {
 		final Path tempFile2 = createTempFileFromResource('/' + WGET_HSTS);
 
 		o.execute(tempFile2.toString(), tempFile1.toString());
+
+		final File backupFile = new File(tempFile2.toString() + ".bak");
+		tempFiles.add(backupFile);
+		Assert.assertTrue(Files.exists(backupFile.toPath()));
 
 		final List<String> y = new ArrayList<>();
 		y.add("pre.https.sub.1");
