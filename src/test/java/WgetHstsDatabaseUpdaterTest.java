@@ -245,22 +245,23 @@ public class WgetHstsDatabaseUpdaterTest {
 		tempFiles.add(backupFile);
 		Assert.assertTrue(Files.exists(backupFile.toPath()));
 
-		final List<String> y = new ArrayList<>();
-		y.add("pre.https.sub.1");
-		y.add("pre.https.sub.2");
-		y.add("pre.https.nosub.1");
-		y.add("pre.https.nosub.2");
-		y.add("nopre.https.sub.1");
-		y.add("nopre.https.sub.2");
-		y.add("nopre.https.nosub.1");
-		y.add("nopre.https.nosub.2");
-		y.add("pre.https.nosub.9");
-		y.add("pre.https.sub.9");
-		y.add("pre.tobe.updated.1");
-		y.add("pre.tobe.updated.2");
+		final Collection<String> y = new ArrayList<>();
+		final String mask = "%s\t%d\t%d\t%d\t%d";
+		y.add(String.format(mask, "pre.https.sub.1", 0, 1, Integer.MAX_VALUE, 0));
+		y.add(String.format(mask, "pre.https.sub.2", 0, 1, Integer.MAX_VALUE, 0));
+		y.add(String.format(mask, "pre.https.nosub.1", 0, 0, Integer.MAX_VALUE, 0));
+		y.add(String.format(mask, "pre.https.nosub.2", 0, 0, Integer.MAX_VALUE, 0));
+		y.add(String.format(mask, "nopre.https.sub.1", 0, 1, 1111111111, 22222222));
+		y.add(String.format(mask, "nopre.https.sub.2", 0, 1, 1111111111, 22222222));
+		y.add(String.format(mask, "nopre.https.nosub.1", 0, 0, 1111111111, 22222222));
+		y.add(String.format(mask, "nopre.https.nosub.2", 0, 0, 1111111111, 22222222));
+		y.add(String.format(mask, "pre.https.nosub.9", 0, 0, Integer.MAX_VALUE, 0));
+		y.add(String.format(mask, "pre.https.sub.9", 0, 1, Integer.MAX_VALUE, 0));
+		y.add(String.format(mask, "pre.tobe.updated.1", 0, 1, Integer.MAX_VALUE, 0));
+		y.add(String.format(mask, "pre.tobe.updated.2", 0, 0, Integer.MAX_VALUE, 0));
 
 		try (final Stream<String> lines = Files.lines(tempFile2)) {
-			final List<String> x = lines.filter(l -> !l.startsWith("#")).map(l -> l.substring(0, l.indexOf('\t'))).collect(Collectors.toList());
+			final Collection<String> x = lines.filter(l -> !l.startsWith("#")).collect(Collectors.toList());
 			Assert.assertEquals(x.size(), y.size());
 			Assert.assertTrue(x.containsAll(y));
 			Assert.assertTrue(y.containsAll(x));
