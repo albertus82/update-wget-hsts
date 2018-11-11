@@ -25,6 +25,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import lombok.Cleanup;
 import lombok.extern.java.Log;
 
 @Log
@@ -260,22 +261,19 @@ public class WgetHstsDatabaseUpdaterTest {
 		y.add(String.format(mask, "pre.tobe.updated.1", 0, 1, Integer.MAX_VALUE, 0));
 		y.add(String.format(mask, "pre.tobe.updated.2", 0, 0, Integer.MAX_VALUE, 0));
 
-		try (final Stream<String> lines = Files.lines(tempFile2)) {
-			final Collection<String> x = lines.filter(l -> !l.startsWith("#")).collect(Collectors.toList());
-			Assert.assertEquals(x.size(), y.size());
-			Assert.assertTrue(x.containsAll(y));
-			Assert.assertTrue(y.containsAll(x));
-		}
+		final @Cleanup Stream<String> lines = Files.lines(tempFile2);
+		final Collection<String> x = lines.filter(l -> !l.startsWith("#")).collect(Collectors.toList());
+		Assert.assertEquals(x.size(), y.size());
+		Assert.assertTrue(x.containsAll(y));
+		Assert.assertTrue(y.containsAll(x));
 	}
 
 	@Test
 	public void testCreateJsonTempFile() throws IOException {
-		final File x;
-		try (final InputStream in = getClass().getResourceAsStream('/' + TRANSPORT_SECURITY_STATE_STATIC_JSON)) {
-			x = o.createJsonTempFile(in);
-			log.log(INFO, "Created temp file ''{0}''.", x);
-			tempFiles.add(x);
-		}
+		final @Cleanup InputStream in = getClass().getResourceAsStream('/' + TRANSPORT_SECURITY_STATE_STATIC_JSON);
+		final File x = o.createJsonTempFile(in);
+		log.log(INFO, "Created temp file ''{0}''.", x);
+		tempFiles.add(x);
 		Assert.assertThat(x.getName(), endsWith(".json"));
 		final Path y = createTempFileFromResource('/' + TRANSPORT_SECURITY_STATE_STATIC_JSON);
 		Assert.assertEquals(Files.size(y), x.length());
@@ -285,9 +283,8 @@ public class WgetHstsDatabaseUpdaterTest {
 		final Path tempFile = Files.createTempFile(null, null);
 		log.log(INFO, "Created temp file ''{0}''.", tempFile);
 		tempFiles.add(tempFile.toFile());
-		try (final InputStream in = getClass().getResourceAsStream(resourceName)) {
-			Files.copy(in, tempFile, StandardCopyOption.REPLACE_EXISTING);
-		}
+		final @Cleanup InputStream in = getClass().getResourceAsStream(resourceName);
+		Files.copy(in, tempFile, StandardCopyOption.REPLACE_EXISTING);
 		return tempFile;
 	}
 
