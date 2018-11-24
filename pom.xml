@@ -14,6 +14,7 @@
 		<main.class>WgetHstsDatabaseUpdater</main.class>
 		<dependency.dir>lib</dependency.dir>
 		<build.timestamp>${maven.build.timestamp}</build.timestamp>
+		<lombok.version>1.18.4</lombok.version>
 	</properties>
 
 	<build>
@@ -63,6 +64,24 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok-maven-plugin</artifactId>
+				<version>${lombok.version}.0</version>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>delombok</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+					<addOutputDirectory>false</addOutputDirectory>
+					<verbose>true</verbose>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.2</version>
@@ -82,7 +101,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.4</version>
+			<version>${lombok.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
