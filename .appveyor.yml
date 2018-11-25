@@ -8,6 +8,11 @@ environment:
       JAVA_HOME: ${ProgramFiles(x86)}\Java\jdk1.8.0
     - platform: x64
       JAVA_HOME: $(ProgramFiles)\Java\jdk1.8.0
+    - platform: x64
+      JAVA_HOME: $(ProgramFiles)\Java\jdk11
+
+install:
+  - cmd: PATH %JAVA_HOME%\bin;%PATH%
 
 before_build:
   - java -Xmx32m -version
