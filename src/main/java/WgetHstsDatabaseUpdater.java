@@ -1,10 +1,12 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -26,6 +28,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import org.chromium.net.http.ChromiumHstsPreloadedEntry;
 import org.chromium.net.http.ChromiumHstsPreloadedList;
@@ -174,12 +177,15 @@ public class WgetHstsDatabaseUpdater {
 	}
 
 	File backupWgetHstsKnownHostsDatabase(@NonNull final File wgetHstsFile) throws IOException {
-		File backupFile = new File(wgetHstsFile.getPath() + ".bak");
+		File backupFile = new File(wgetHstsFile.getPath() + ".bak.gz");
 		int i = 1;
 		while (backupFile.exists()) {
-			backupFile = new File(wgetHstsFile.getPath() + ".bak." + i++);
+			backupFile = new File(wgetHstsFile.getPath() + ".bak." + i++ + ".gz");
 		}
-		return Files.copy(wgetHstsFile.toPath(), backupFile.toPath()).toFile();
+		try (final OutputStream fos = new FileOutputStream(backupFile); final OutputStream gzos = new GZIPOutputStream(fos)) {
+			Files.copy(wgetHstsFile.toPath(), gzos);
+		}
+		return backupFile;
 	}
 
 	Map<String, ChromiumHstsPreloadedEntry> parseChromiumHstsPreloadedList(@NonNull final File transportSecurityStateStaticJson) throws IOException {

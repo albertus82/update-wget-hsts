@@ -209,7 +209,7 @@ public class WgetHstsDatabaseUpdaterTest {
 		final File x = o.backupWgetHstsKnownHostsDatabase(tempFile.toFile());
 		log.log(INFO, "Created temp file ''{0}''", x);
 		tempFiles.add(x);
-		Assert.assertThat(x.getName(), endsWith(".bak"));
+		Assert.assertThat(x.getName(), endsWith(".bak.gz"));
 		Assert.assertTrue(x.exists());
 		Assert.assertTrue(x.isFile());
 		Assert.assertThat(x.length(), greaterThan(0L));
@@ -217,7 +217,7 @@ public class WgetHstsDatabaseUpdaterTest {
 		final File y = o.backupWgetHstsKnownHostsDatabase(tempFile.toFile());
 		log.log(INFO, "Created temp file ''{0}''", y);
 		tempFiles.add(y);
-		Assert.assertThat(y.getName(), endsWith(".bak.1"));
+		Assert.assertThat(y.getName(), endsWith(".bak.1.gz"));
 		Assert.assertTrue(y.exists());
 		Assert.assertTrue(y.isFile());
 		Assert.assertThat(y.length(), greaterThan(0L));
@@ -225,7 +225,7 @@ public class WgetHstsDatabaseUpdaterTest {
 		final File z = o.backupWgetHstsKnownHostsDatabase(tempFile.toFile());
 		log.log(INFO, "Created temp file ''{0}''", z);
 		tempFiles.add(z);
-		Assert.assertThat(z.getName(), endsWith(".bak.2"));
+		Assert.assertThat(z.getName(), endsWith(".bak.2.gz"));
 		Assert.assertTrue(z.exists());
 		Assert.assertTrue(z.isFile());
 		Assert.assertThat(z.length(), greaterThan(0L));
@@ -239,7 +239,7 @@ public class WgetHstsDatabaseUpdaterTest {
 		final long t = System.currentTimeMillis() - 999;
 		o.execute(tempFile2.toString(), tempFile1.toString());
 
-		final File backupFile = new File(tempFile2.toString() + ".bak");
+		final File backupFile = new File(tempFile2.toString() + ".bak.gz");
 		if (backupFile.lastModified() < t) {
 			throw new IllegalStateException(backupFile.lastModified() + " < " + t);
 		}
