@@ -11,13 +11,5 @@ environment:
     - platform: x64
       JAVA_HOME: $(ProgramFiles)\Java\jdk11
 
-install:
-  - cmd: PATH %JAVA_HOME%\bin;%PATH%
-
-before_build:
-  - java -Xmx32m -version
-  - javac -J-Xmx32m -version
-  - mvn -version
-
 build_script:
-- mvn test
+- mvn clean verify -V
