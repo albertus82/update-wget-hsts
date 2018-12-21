@@ -1,7 +1,7 @@
 # update-wget-hsts-database
 
-[![Build Status](https://travis-ci.org/Albertus82/update-wget-hsts-database.svg?branch=master)](https://travis-ci.org/Albertus82/update-wget-hsts-database)
-[![Build status](https://ci.appveyor.com/api/projects/status/github/Albertus82/update-wget-hsts-database?branch=master&svg=true)](https://ci.appveyor.com/project/Albertus82/update-wget-hsts-database)
+[![Build Status](https://travis-ci.org/albertus82/update-wget-hsts-database.svg?branch=master)](https://travis-ci.org/albertus82/update-wget-hsts-database)
+[![Build status](https://ci.appveyor.com/api/projects/status/github/albertus82/update-wget-hsts-database?branch=master&svg=true)](https://ci.appveyor.com/project/albertus82/update-wget-hsts-database)
 
 Import preloaded *HTTP Strict Transport Security* (HSTS) domains into GNU Wget.
 
@@ -12,7 +12,7 @@ Import preloaded *HTTP Strict Transport Security* (HSTS) domains into GNU Wget.
 
 ## Build
 
-`mvn clean package`
+`mvn clean verify`
 
 ## Usage
 
@@ -24,9 +24,9 @@ Import preloaded *HTTP Strict Transport Security* (HSTS) domains into GNU Wget.
 ## Example
 
 ```sh
-git clone https://github.com/Albertus82/update-wget-hsts-database.git
+git clone https://github.com/albertus82/update-wget-hsts-database.git
 cd update-wget-hsts-database
-mvn clean package
+mvn clean verify
 cd target
 java -jar update-wget-hsts-database.jar ~/.wget-hsts https://cs.chromium.org/codesearch/f/chromium/src/net/http/transport_security_state_static.json
 ```
