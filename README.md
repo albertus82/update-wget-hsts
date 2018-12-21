@@ -1,11 +1,11 @@
-# update-wget-hsts-database
+# Update Wget HSTS Database
 
 [![Build Status](https://travis-ci.org/albertus82/update-wget-hsts-database.svg?branch=master)](https://travis-ci.org/albertus82/update-wget-hsts-database)
 [![Build status](https://ci.appveyor.com/api/projects/status/github/albertus82/update-wget-hsts-database?branch=master&svg=true)](https://ci.appveyor.com/project/albertus82/update-wget-hsts-database)
 
 Import preloaded *HTTP Strict Transport Security* (HSTS) domains into GNU Wget.
 
-## Requirements
+## Minimum requirements
 
 * Java SE Development Kit 8
 * [Apache Maven](https://maven.apache.org) 3.3.x
