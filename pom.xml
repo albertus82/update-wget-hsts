@@ -44,9 +44,6 @@
 							<rules>
 								<enforceBytecodeVersion>
 									<maxJdkVersion>${maven.compiler.target}</maxJdkVersion>
-									<excludes>
-										<exclude>org.mindrot:jbcrypt</exclude>
-									</excludes>
 								</enforceBytecodeVersion>
 							</rules>
 							<fail>true</fail>
