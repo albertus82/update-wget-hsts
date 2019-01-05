@@ -12,4 +12,4 @@ environment:
       JAVA_HOME: $(ProgramFiles)\Java\jdk11
 
 build_script:
-- mvn clean verify -V
+  - mvn clean verify -V
