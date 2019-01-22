@@ -220,7 +220,7 @@ public class WgetHstsDatabaseUpdater {
 			}
 		}
 		catch (final Exception e) {
-			log.log(Level.SEVERE, "Errore durante la lettura del file classpath:" + BUILD_INFO_FILE_NAME, e);
+			log.log(Level.SEVERE, "Cannot read class path resource:" + BUILD_INFO_FILE_NAME, e);
 		}
 		return properties;
 	}
