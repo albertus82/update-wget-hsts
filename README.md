@@ -1,7 +1,7 @@
 # Wget Update HSTS Database
 
-[![Build Status](https://travis-ci.org/albertus82/update-wget-hsts-database.svg?branch=master)](https://travis-ci.org/albertus82/update-wget-hsts-database)
-[![Build status](https://ci.appveyor.com/api/projects/status/github/albertus82/update-wget-hsts-database?branch=master&svg=true)](https://ci.appveyor.com/project/albertus82/update-wget-hsts-database)
+[![Build Status](https://travis-ci.org/albertus82/wget-update-hsts-database.svg?branch=master)](https://travis-ci.org/albertus82/wget-update-hsts-database)
+[![Build status](https://ci.appveyor.com/api/projects/status/github/albertus82/wget-update-hsts-database?branch=master&svg=true)](https://ci.appveyor.com/project/albertus82/wget-update-hsts-database)
 
 Import preloaded *HTTP Strict Transport Security* (HSTS) domains into GNU Wget.
 
@@ -16,7 +16,7 @@ Import preloaded *HTTP Strict Transport Security* (HSTS) domains into GNU Wget.
 
 ## Usage
 
-`java -jar  update-wget-hsts-database.jar DESTINATION SOURCE`
+`java -jar  wget-update-hsts-database.jar DESTINATION SOURCE`
 
 * `DESTINATION`: the `wget-hsts` file to write/update.
 * `SOURCE`: the `transport_security_state_static.json` file, or a URL pointing to it.
@@ -24,9 +24,9 @@ Import preloaded *HTTP Strict Transport Security* (HSTS) domains into GNU Wget.
 ## Example
 
 ```sh
-git clone https://github.com/albertus82/update-wget-hsts-database.git
-cd update-wget-hsts-database
+git clone https://github.com/albertus82/wget-update-hsts-database.git
+cd wget-update-hsts-database
 mvn clean verify
 cd target
-java -jar update-wget-hsts-database.jar ~/.wget-hsts https://cs.chromium.org/codesearch/f/chromium/src/net/http/transport_security_state_static.json
+java -jar wget-update-hsts-database.jar ~/.wget-hsts https://cs.chromium.org/codesearch/f/chromium/src/net/http/transport_security_state_static.json
 ```

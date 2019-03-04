@@ -5,11 +5,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.example</groupId>
-	<artifactId>update-wget-hsts-database</artifactId>
+	<artifactId>wget-update-hsts-database</artifactId>
 	<version>0.1.0</version>
 
-	<name>Update Wget HSTS Database</name>
-	<url>https://github.com/albertus82/update-wget-hsts-database</url>
+	<name>Wget Update HSTS Database</name>
+	<url>https://github.com/albertus82/wget-update-hsts-database</url>
 
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
