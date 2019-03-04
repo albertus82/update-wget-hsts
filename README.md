@@ -1,4 +1,4 @@
-# Update Wget HSTS Database
+# Wget Update HSTS Database
 
 [![Build Status](https://travis-ci.org/albertus82/update-wget-hsts-database.svg?branch=master)](https://travis-ci.org/albertus82/update-wget-hsts-database)
 [![Build status](https://ci.appveyor.com/api/projects/status/github/albertus82/update-wget-hsts-database?branch=master&svg=true)](https://ci.appveyor.com/project/albertus82/update-wget-hsts-database)
