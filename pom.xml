@@ -18,7 +18,7 @@
 		<main.class>WgetHstsDatabaseUpdater</main.class>
 		<dependency.dir>lib</dependency.dir>
 		<build.timestamp>${maven.build.timestamp}</build.timestamp>
-		<lombok.version>1.18.4</lombok.version>
+		<lombok.version>1.18.10</lombok.version>
 	</properties>
 
 	<build>
@@ -33,7 +33,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.0.0-M2</version>
+				<version>3.0.0-M3</version>
 				<executions>
 					<execution>
 						<id>enforce-bytecode-version</id>
@@ -54,14 +54,14 @@
 					<dependency>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>extra-enforcer-rules</artifactId>
-						<version>1.0-beta-9</version>
+						<version>1.2</version>
 					</dependency>
 				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>animal-sniffer-maven-plugin</artifactId>
-				<version>1.16</version>
+				<version>1.18</version>
 				<executions>
 					<execution>
 						<phase>process-classes</phase>
@@ -136,7 +136,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.3</version>
+				<version>0.8.5</version>
 				<executions>
 					<execution>
 						<id>default-prepare-agent</id>
@@ -164,7 +164,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
+			<version>4.13</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
