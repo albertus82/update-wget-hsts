@@ -16,7 +16,7 @@ Import preloaded *HTTP Strict Transport Security* (HSTS) domains into GNU Wget.
 
 ## Usage
 
-`java -jar  wget-update-hsts-database.jar DESTINATION SOURCE`
+`java -jar wget-update-hsts-database.jar DESTINATION SOURCE`
 
 * `DESTINATION`: the `wget-hsts` file to write/update.
 * `SOURCE`: the `transport_security_state_static.json` file, or a URL pointing to it.
