@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 
 import org.chromium.net.http.ChromiumHstsPreloadedEntry;
 import org.gnu.wget.WgetHstsKnownHost;
+import org.hamcrest.MatcherAssert;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -191,7 +192,7 @@ public class WgetHstsDatabaseUpdaterTest {
 		tempFiles.add(x.toFile());
 		Assert.assertTrue(Files.exists(x));
 		Assert.assertTrue(Files.isRegularFile(x));
-		Assert.assertThat(Files.size(x), greaterThan(0L));
+		MatcherAssert.assertThat(Files.size(x), greaterThan(0L));
 	}
 
 	@Test
@@ -209,26 +210,26 @@ public class WgetHstsDatabaseUpdaterTest {
 		final File x = o.backupWgetHstsKnownHostsDatabase(tempFile.toFile());
 		log.log(INFO, "Created temp file ''{0}''", x);
 		tempFiles.add(x);
-		Assert.assertThat(x.getName(), endsWith(".bak.gz"));
+		MatcherAssert.assertThat(x.getName(), endsWith(".bak.gz"));
 		Assert.assertTrue(x.exists());
 		Assert.assertTrue(x.isFile());
-		Assert.assertThat(x.length(), greaterThan(0L));
+		MatcherAssert.assertThat(x.length(), greaterThan(0L));
 
 		final File y = o.backupWgetHstsKnownHostsDatabase(tempFile.toFile());
 		log.log(INFO, "Created temp file ''{0}''", y);
 		tempFiles.add(y);
-		Assert.assertThat(y.getName(), endsWith(".bak.1.gz"));
+		MatcherAssert.assertThat(y.getName(), endsWith(".bak.1.gz"));
 		Assert.assertTrue(y.exists());
 		Assert.assertTrue(y.isFile());
-		Assert.assertThat(y.length(), greaterThan(0L));
+		MatcherAssert.assertThat(y.length(), greaterThan(0L));
 
 		final File z = o.backupWgetHstsKnownHostsDatabase(tempFile.toFile());
 		log.log(INFO, "Created temp file ''{0}''", z);
 		tempFiles.add(z);
-		Assert.assertThat(z.getName(), endsWith(".bak.2.gz"));
+		MatcherAssert.assertThat(z.getName(), endsWith(".bak.2.gz"));
 		Assert.assertTrue(z.exists());
 		Assert.assertTrue(z.isFile());
-		Assert.assertThat(z.length(), greaterThan(0L));
+		MatcherAssert.assertThat(z.length(), greaterThan(0L));
 	}
 
 	@Test
@@ -274,7 +275,7 @@ public class WgetHstsDatabaseUpdaterTest {
 		final File x = o.createJsonTempFile(in);
 		log.log(INFO, "Created temp file ''{0}''.", x);
 		tempFiles.add(x);
-		Assert.assertThat(x.getName(), endsWith(".json"));
+		MatcherAssert.assertThat(x.getName(), endsWith(".json"));
 		final Path y = createTempFileFromResource('/' + TRANSPORT_SECURITY_STATE_STATIC_JSON);
 		Assert.assertEquals(Files.size(y), x.length());
 	}
