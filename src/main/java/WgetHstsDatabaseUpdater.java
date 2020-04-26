@@ -1,9 +1,5 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -13,6 +9,7 @@ import java.net.URLConnection;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
@@ -41,6 +38,7 @@ import lombok.Value;
 import lombok.extern.java.Log;
 
 @Log
+@SuppressWarnings("java:S106")
 public class WgetHstsDatabaseUpdater {
 
 	private static final String BUILD_INFO_FILE_NAME = "/META-INF/build-info.properties";
@@ -57,21 +55,21 @@ public class WgetHstsDatabaseUpdater {
 
 	void execute(@NonNull final String destination, @NonNull final String source) throws IOException {
 		final SourceFile sourceFile = retrieveSourceFile(source);
-		System.out.printf("Parsing source file '%s'... ", sourceFile.getFile());
-		final Map<String, ChromiumHstsPreloadedEntry> chromiumHstsPreloadedEntryMap = parseChromiumHstsPreloadedList(sourceFile.getFile());
+		System.out.printf("Parsing source file '%s'... ", sourceFile.getPath());
+		final Map<String, ChromiumHstsPreloadedEntry> chromiumHstsPreloadedEntryMap = parseChromiumHstsPreloadedList(sourceFile.getPath());
 		if (sourceFile.isTemp()) {
-			sourceFile.getFile().delete();
+			Files.delete(sourceFile.getPath());
 		}
 		System.out.printf("%d entries found%n", chromiumHstsPreloadedEntryMap.size());
 
-		final File destinationFile = new File(destination);
+		final Path destinationPath = Paths.get(destination);
 
 		final Map<String, WgetHstsEntry> wgetHstsKnownHostMap;
 		final Set<String> hostsToRemove;
 		final Set<String> hostsToUpdate;
-		if (destinationFile.exists()) {
-			System.out.printf("Parsing destination file '%s'... ", destinationFile);
-			wgetHstsKnownHostMap = parseWgetHstsKnownHostsDatabase(destinationFile);
+		if (destinationPath.toFile().exists()) {
+			System.out.printf("Parsing destination file '%s'... ", destinationPath);
+			wgetHstsKnownHostMap = parseWgetHstsKnownHostsDatabase(destinationPath);
 			System.out.printf("%d entries found%n", wgetHstsKnownHostMap.size());
 
 			System.out.print("Computing entries to delete... ");
@@ -97,7 +95,7 @@ public class WgetHstsDatabaseUpdater {
 		if (!entriesToWrite.isEmpty() || !hostsToRemove.isEmpty()) {
 			System.out.print("Collecting entries to write... ");
 			final Path tempPath = createTempWgetHstsKnownHostsDatabase();
-			try (final FileWriter fw = new FileWriter(tempPath.toFile(), true); final BufferedWriter bw = new BufferedWriter(fw)) {
+			try (final BufferedWriter bw = Files.newBufferedWriter(tempPath, StandardOpenOption.APPEND)) {
 				final Stream<WgetHstsEntry> retained = wgetHstsKnownHostMap.values().stream().filter(e -> !hostsToRemove.contains(e.getHostname()) && !hostsToUpdate.contains(e.getHostname()));
 				final Stream<WgetHstsEntry> updated = entriesToWrite.stream().map(oe -> WgetHstsEntry.builder().hostname(oe.getName()).includeSubdomains(oe.isIncludeSubdomains() || oe.isIncludeSubdomainsForPinning()).created(Integer.MAX_VALUE).maxAge(0).build()).sorted((e1, e2) -> e1.getHostname().compareTo(e2.getHostname()));
 				Stream.concat(retained, updated).map(WgetHstsEntry::toString).forEachOrdered(l -> writeLine(bw, l));
@@ -108,19 +106,19 @@ public class WgetHstsDatabaseUpdater {
 			}
 			System.out.println("done");
 
-			if (destinationFile.exists()) {
-				System.out.printf("Backing up existing file '%s'... ", destinationFile);
-				final File backupFile = backupWgetHstsKnownHostsDatabase(destinationFile);
-				System.out.printf("-> '%s'%n", backupFile);
+			if (destinationPath.toFile().exists()) {
+				System.out.printf("Backing up existing file '%s'... ", destinationPath);
+				final Path backupPath = backupWgetHstsKnownHostsDatabase(destinationPath);
+				System.out.printf("-> '%s'%n", backupPath);
 			}
 
-			System.out.printf("Updating destination file '%s'... ", destinationFile);
+			System.out.printf("Updating destination file '%s'... ", destinationPath);
 			try {
-				Files.move(tempPath, destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+				Files.move(tempPath, destinationPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 			}
 			catch (final AtomicMoveNotSupportedException e) {
 				log.log(Level.FINE, e.toString(), e);
-				Files.move(tempPath, destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				Files.move(tempPath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
 			}
 			System.out.println("done");
 		}
@@ -152,16 +150,16 @@ public class WgetHstsDatabaseUpdater {
 			final URLConnection connection = url.openConnection();
 			connection.setRequestProperty("Accept-Encoding", "gzip");
 			connection.setRequestProperty("Accept", "application/json,*/*;q=0.9");
-			final File file;
+			final Path path;
 			try (final InputStream raw = connection.getInputStream(); final InputStream in = "gzip".equalsIgnoreCase(connection.getContentEncoding()) ? new GZIPInputStream(raw) : raw) {
-				file = createJsonTempFile(in);
+				path = createJsonTempFile(in);
 			}
-			System.out.printf("%d kB fetched%n", file.length() / 1024);
-			return new SourceFile(file, true);
+			System.out.printf("%d kB fetched%n", path.toFile().length() / 1024);
+			return new SourceFile(path, true);
 		}
 		catch (final MalformedURLException e) {
 			log.log(Level.FINE, e.toString(), e);
-			return new SourceFile(new File(source), false);
+			return new SourceFile(Paths.get(source), false);
 		}
 	}
 
@@ -170,44 +168,43 @@ public class WgetHstsDatabaseUpdater {
 		return Files.write(path, Arrays.asList("# HSTS 1.0 Known Hosts database for GNU Wget.", "# Edit at your own risk.", "# <hostname>\t<port>\t<incl. subdomains>\t<created>\t<max-age>"), StandardOpenOption.APPEND);
 	}
 
-	File backupWgetHstsKnownHostsDatabase(@NonNull final File wgetHstsFile) throws IOException {
-		File backupFile = new File(wgetHstsFile.getPath() + ".bak.gz");
+	Path backupWgetHstsKnownHostsDatabase(@NonNull final Path wgetHstsPath) throws IOException {
+		Path backupPath = Paths.get(wgetHstsPath + ".bak.gz");
 		int i = 1;
-		while (backupFile.exists()) {
-			backupFile = new File(wgetHstsFile.getPath() + ".bak." + i++ + ".gz");
+		while (backupPath.toFile().exists()) {
+			backupPath = Paths.get(wgetHstsPath + ".bak." + i++ + ".gz");
 		}
-		try (final OutputStream fos = new FileOutputStream(backupFile); final OutputStream gzos = new GZIPOutputStream(fos)) {
-			Files.copy(wgetHstsFile.toPath(), gzos);
+		try (final OutputStream fos = Files.newOutputStream(backupPath); final OutputStream gzos = new GZIPOutputStream(fos)) {
+			Files.copy(wgetHstsPath, gzos);
 		}
-		return backupFile;
+		return backupPath;
 	}
 
-	Map<String, ChromiumHstsPreloadedEntry> parseChromiumHstsPreloadedList(@NonNull final File transportSecurityStateStaticJson) throws IOException {
+	Map<String, ChromiumHstsPreloadedEntry> parseChromiumHstsPreloadedList(@NonNull final Path transportSecurityStateStaticJson) throws IOException {
 		final ChromiumHstsPreloadedList root;
-		try (final FileReader fr = new FileReader(transportSecurityStateStaticJson); final BufferedReader br = new BufferedReader(fr)) {
+		try (final BufferedReader br = Files.newBufferedReader(transportSecurityStateStaticJson)) {
 			root = new Gson().fromJson(br, ChromiumHstsPreloadedList.class);
 		}
 		return root.getEntries().stream().collect(Collectors.toMap(ChromiumHstsPreloadedEntry::getName, e -> e));
 	}
 
-	Map<String, WgetHstsEntry> parseWgetHstsKnownHostsDatabase(@NonNull final File wgetHstsFile) throws IOException {
-		try (final Stream<String> lines = Files.lines(wgetHstsFile.toPath())) {
+	Map<String, WgetHstsEntry> parseWgetHstsKnownHostsDatabase(@NonNull final Path wgetHstsFile) throws IOException {
+		try (final Stream<String> lines = Files.lines(wgetHstsFile)) {
 			return lines.map(String::trim).filter(l -> !l.startsWith("#")).map(l -> l.split("[\\t\\s]+")).filter(a -> a.length == 5).map(a -> WgetHstsEntry.builder().hostname(a[0].trim()).port(Integer.parseInt(a[1].trim())).includeSubdomains("1".equals(a[2].trim())).created(Integer.parseInt(a[3].trim())).maxAge(Integer.parseInt(a[4].trim())).build()).collect(Collectors.toMap(WgetHstsEntry::getHostname, e -> e, (k, v) -> {
 				throw new IllegalStateException("Duplicate key " + k);
 			}, LinkedHashMap::new));
 		}
 	}
 
-	File createJsonTempFile(@NonNull final InputStream in) throws IOException {
+	Path createJsonTempFile(@NonNull final InputStream in) throws IOException {
 		final Path path = Files.createTempFile("hsts-", ".json");
 		Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
-		final File file = path.toFile();
-		file.deleteOnExit();
-		return file;
+		path.toFile().deleteOnExit();
+		return path;
 	}
 
 	@SneakyThrows(IOException.class)
-	private static void writeLine(final BufferedWriter writer, final String line) {
+	private static void writeLine(@NonNull final BufferedWriter writer, @NonNull final String line) {
 		writer.write(line);
 		writer.newLine();
 	}
@@ -227,7 +224,7 @@ public class WgetHstsDatabaseUpdater {
 
 	@Value
 	static class SourceFile {
-		File file;
+		Path path;
 		boolean temp;
 	}
 }
