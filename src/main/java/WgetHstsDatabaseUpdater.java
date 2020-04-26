@@ -7,7 +7,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -32,11 +31,12 @@ import java.util.zip.GZIPOutputStream;
 
 import org.chromium.net.http.ChromiumHstsPreloadedEntry;
 import org.chromium.net.http.ChromiumHstsPreloadedList;
-import org.gnu.wget.WgetHstsKnownHost;
+import org.gnu.wget.WgetHstsEntry;
 
 import com.google.gson.Gson;
 
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.extern.java.Log;
 
@@ -66,7 +66,7 @@ public class WgetHstsDatabaseUpdater {
 
 		final File destinationFile = new File(destination);
 
-		final Map<String, WgetHstsKnownHost> wgetHstsKnownHostMap;
+		final Map<String, WgetHstsEntry> wgetHstsKnownHostMap;
 		final Set<String> hostsToRemove;
 		final Set<String> hostsToUpdate;
 		if (destinationFile.exists()) {
@@ -75,7 +75,7 @@ public class WgetHstsDatabaseUpdater {
 			System.out.printf("%d entries found%n", wgetHstsKnownHostMap.size());
 
 			System.out.print("Computing entries to delete... ");
-			final Map<String, WgetHstsKnownHost> wgetHstsPreloadedHostMap = retrieveWgetHstsPreloadedHosts(wgetHstsKnownHostMap);
+			final Map<String, WgetHstsEntry> wgetHstsPreloadedHostMap = retrieveWgetHstsPreloadedHosts(wgetHstsKnownHostMap);
 			hostsToRemove = computeHostsToRemove(chromiumHstsPreloadedEntryMap.keySet(), wgetHstsPreloadedHostMap.keySet());
 			System.out.println(hostsToRemove.isEmpty() ? "none" : hostsToRemove.size());
 
@@ -98,15 +98,9 @@ public class WgetHstsDatabaseUpdater {
 			System.out.print("Collecting entries to write... ");
 			final Path tempPath = createTempWgetHstsKnownHostsDatabase();
 			try (final FileWriter fw = new FileWriter(tempPath.toFile(), true); final BufferedWriter bw = new BufferedWriter(fw)) {
-				Stream.concat(wgetHstsKnownHostMap.values().stream().filter(e -> !hostsToRemove.contains(e.getHostname()) && !hostsToUpdate.contains(e.getHostname())), entriesToWrite.stream().map(oe -> WgetHstsKnownHost.builder().hostname(oe.getName()).includeSubdomains(oe.isIncludeSubdomains() || oe.isIncludeSubdomainsForPinning()).created(Integer.MAX_VALUE).maxAge(0).build()).sorted((e1, e2) -> e1.getHostname().compareTo(e2.getHostname()))).map(e -> String.format("%s\t%d\t%d\t%d\t%d", e.getHostname(), e.getPort(), e.isIncludeSubdomains() ? 1 : 0, e.getCreated(), e.getMaxAge())).forEachOrdered(l -> {
-					try {
-						bw.write(l);
-						bw.newLine();
-					}
-					catch (final IOException e) {
-						throw new UncheckedIOException(e);
-					}
-				});
+				final Stream<WgetHstsEntry> retained = wgetHstsKnownHostMap.values().stream().filter(e -> !hostsToRemove.contains(e.getHostname()) && !hostsToUpdate.contains(e.getHostname()));
+				final Stream<WgetHstsEntry> updated = entriesToWrite.stream().map(oe -> WgetHstsEntry.builder().hostname(oe.getName()).includeSubdomains(oe.isIncludeSubdomains() || oe.isIncludeSubdomainsForPinning()).created(Integer.MAX_VALUE).maxAge(0).build()).sorted((e1, e2) -> e1.getHostname().compareTo(e2.getHostname()));
+				Stream.concat(retained, updated).map(WgetHstsEntry::toString).forEachOrdered(l -> writeLine(bw, l));
 			}
 			catch (final Exception e) {
 				Files.deleteIfExists(tempPath);
@@ -132,11 +126,11 @@ public class WgetHstsDatabaseUpdater {
 		}
 	}
 
-	Collection<ChromiumHstsPreloadedEntry> computeEntriesToWrite(final Map<String, ChromiumHstsPreloadedEntry> chromiumHstsPreloadedEntryMap, final Map<String, WgetHstsKnownHost> wgetHstsKnownHostMap, final Set<String> hostsToUpdate) {
+	Collection<ChromiumHstsPreloadedEntry> computeEntriesToWrite(final Map<String, ChromiumHstsPreloadedEntry> chromiumHstsPreloadedEntryMap, final Map<String, WgetHstsEntry> wgetHstsKnownHostMap, final Set<String> hostsToUpdate) {
 		return chromiumHstsPreloadedEntryMap.values().stream().filter(e -> "force-https".equalsIgnoreCase(e.getMode()) && (!wgetHstsKnownHostMap.containsKey(e.getName()) || hostsToUpdate.contains(e.getName()))).collect(Collectors.toList());
 	}
 
-	Set<String> computeHostsToUpdate(@NonNull final Map<String, ChromiumHstsPreloadedEntry> chromiumHstsPreloadedEntryMap, @NonNull final Map<String, WgetHstsKnownHost> wgetHstsPreloadedHostMap) {
+	Set<String> computeHostsToUpdate(@NonNull final Map<String, ChromiumHstsPreloadedEntry> chromiumHstsPreloadedEntryMap, @NonNull final Map<String, WgetHstsEntry> wgetHstsPreloadedHostMap) {
 		return wgetHstsPreloadedHostMap.entrySet().stream().filter(e -> {
 			final ChromiumHstsPreloadedEntry preloadedEntry = chromiumHstsPreloadedEntryMap.get(e.getKey());
 			return preloadedEntry != null && (preloadedEntry.isIncludeSubdomains() || preloadedEntry.isIncludeSubdomainsForPinning()) != e.getValue().isIncludeSubdomains();
@@ -147,7 +141,7 @@ public class WgetHstsDatabaseUpdater {
 		return wgetHstsPreloadedHosts.stream().filter(wgetPreloadedHost -> !chromiumHstsPreloadedHosts.contains(wgetPreloadedHost)).collect(Collectors.toSet());
 	}
 
-	Map<String, WgetHstsKnownHost> retrieveWgetHstsPreloadedHosts(final Map<String, WgetHstsKnownHost> wgetHstsKnownHostMap) {
+	Map<String, WgetHstsEntry> retrieveWgetHstsPreloadedHosts(final Map<String, WgetHstsEntry> wgetHstsKnownHostMap) {
 		return wgetHstsKnownHostMap.entrySet().stream().filter(e -> e.getValue().getCreated() == Integer.MAX_VALUE && e.getValue().getMaxAge() == 0).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 	}
 
@@ -196,9 +190,9 @@ public class WgetHstsDatabaseUpdater {
 		return root.getEntries().stream().collect(Collectors.toMap(ChromiumHstsPreloadedEntry::getName, e -> e));
 	}
 
-	Map<String, WgetHstsKnownHost> parseWgetHstsKnownHostsDatabase(@NonNull final File wgetHstsFile) throws IOException {
+	Map<String, WgetHstsEntry> parseWgetHstsKnownHostsDatabase(@NonNull final File wgetHstsFile) throws IOException {
 		try (final Stream<String> lines = Files.lines(wgetHstsFile.toPath())) {
-			return lines.map(String::trim).filter(l -> !l.startsWith("#")).map(l -> l.split("[\\t\\s]+")).filter(a -> a.length == 5).map(a -> WgetHstsKnownHost.builder().hostname(a[0].trim()).port(Integer.parseInt(a[1].trim())).includeSubdomains("1".equals(a[2].trim())).created(Integer.parseInt(a[3].trim())).maxAge(Integer.parseInt(a[4].trim())).build()).collect(Collectors.toMap(WgetHstsKnownHost::getHostname, e -> e, (k, v) -> {
+			return lines.map(String::trim).filter(l -> !l.startsWith("#")).map(l -> l.split("[\\t\\s]+")).filter(a -> a.length == 5).map(a -> WgetHstsEntry.builder().hostname(a[0].trim()).port(Integer.parseInt(a[1].trim())).includeSubdomains("1".equals(a[2].trim())).created(Integer.parseInt(a[3].trim())).maxAge(Integer.parseInt(a[4].trim())).build()).collect(Collectors.toMap(WgetHstsEntry::getHostname, e -> e, (k, v) -> {
 				throw new IllegalStateException("Duplicate key " + k);
 			}, LinkedHashMap::new));
 		}
@@ -210,6 +204,12 @@ public class WgetHstsDatabaseUpdater {
 		final File file = path.toFile();
 		file.deleteOnExit();
 		return file;
+	}
+
+	@SneakyThrows(IOException.class)
+	private static void writeLine(final BufferedWriter writer, final String line) {
+		writer.write(line);
+		writer.newLine();
 	}
 
 	private static Properties loadBuildInfo() {

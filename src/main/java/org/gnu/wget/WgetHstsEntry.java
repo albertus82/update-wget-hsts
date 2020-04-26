@@ -6,7 +6,7 @@ import lombok.NonNull;
 
 @Data
 @Builder
-public class WgetHstsKnownHost {
+public class WgetHstsEntry {
 
 	@NonNull
 	private final String hostname;
@@ -18,5 +18,9 @@ public class WgetHstsKnownHost {
 	private int created;
 
 	private int maxAge;
+
+	public String toString() {
+		return String.format("%s\t%d\t%d\t%d\t%d", hostname, port, includeSubdomains ? 1 : 0, created, maxAge);
+	}
 
 }

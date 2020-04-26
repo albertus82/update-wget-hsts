@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.chromium.net.http.ChromiumHstsPreloadedEntry;
-import org.gnu.wget.WgetHstsKnownHost;
+import org.gnu.wget.WgetHstsEntry;
 import org.hamcrest.MatcherAssert;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -83,7 +83,7 @@ public class WgetHstsDatabaseUpdaterTest {
 	@Test
 	public void testParseWgetHstsKnownHostsDatabase() throws IOException {
 		final Path tempFile = createTempFileFromResource('/' + WGET_HSTS);
-		final Map<String, WgetHstsKnownHost> x = o.parseWgetHstsKnownHostsDatabase(tempFile.toFile());
+		final Map<String, WgetHstsEntry> x = o.parseWgetHstsKnownHostsDatabase(tempFile.toFile());
 		Assert.assertNotNull(x);
 		final List<String> l = new ArrayList<>(x.size());
 		l.add("pre.https.sub.1");
@@ -108,8 +108,8 @@ public class WgetHstsDatabaseUpdaterTest {
 	@Test
 	public void testRetrieveWgetHstsPreloadedHosts() throws IOException {
 		final Path tempFile = createTempFileFromResource('/' + WGET_HSTS);
-		final Map<String, WgetHstsKnownHost> map1 = o.parseWgetHstsKnownHostsDatabase(tempFile.toFile());
-		final Map<String, WgetHstsKnownHost> x = o.retrieveWgetHstsPreloadedHosts(map1);
+		final Map<String, WgetHstsEntry> map1 = o.parseWgetHstsKnownHostsDatabase(tempFile.toFile());
+		final Map<String, WgetHstsEntry> x = o.retrieveWgetHstsPreloadedHosts(map1);
 		Assert.assertNotNull(x);
 		final List<String> l = new ArrayList<>(x.size());
 		l.add("pre.https.sub.1");
@@ -133,8 +133,8 @@ public class WgetHstsDatabaseUpdaterTest {
 		final Map<String, ChromiumHstsPreloadedEntry> map1 = o.parseChromiumHstsPreloadedList(tempFile1.toFile());
 
 		final Path tempFile2 = createTempFileFromResource('/' + WGET_HSTS);
-		final Map<String, WgetHstsKnownHost> map = o.parseWgetHstsKnownHostsDatabase(tempFile2.toFile());
-		final Map<String, WgetHstsKnownHost> map2 = o.retrieveWgetHstsPreloadedHosts(map);
+		final Map<String, WgetHstsEntry> map = o.parseWgetHstsKnownHostsDatabase(tempFile2.toFile());
+		final Map<String, WgetHstsEntry> map2 = o.retrieveWgetHstsPreloadedHosts(map);
 
 		final Set<String> x = o.computeHostsToRemove(map1.keySet(), map2.keySet());
 		Assert.assertNotNull(x);
@@ -151,8 +151,8 @@ public class WgetHstsDatabaseUpdaterTest {
 		final Map<String, ChromiumHstsPreloadedEntry> map1 = o.parseChromiumHstsPreloadedList(tempFile1.toFile());
 
 		final Path tempFile2 = createTempFileFromResource('/' + WGET_HSTS);
-		final Map<String, WgetHstsKnownHost> map = o.parseWgetHstsKnownHostsDatabase(tempFile2.toFile());
-		final Map<String, WgetHstsKnownHost> map2 = o.retrieveWgetHstsPreloadedHosts(map);
+		final Map<String, WgetHstsEntry> map = o.parseWgetHstsKnownHostsDatabase(tempFile2.toFile());
+		final Map<String, WgetHstsEntry> map2 = o.retrieveWgetHstsPreloadedHosts(map);
 
 		final Set<String> x = o.computeHostsToUpdate(map1, map2);
 		Assert.assertNotNull(x);
@@ -169,8 +169,8 @@ public class WgetHstsDatabaseUpdaterTest {
 		final Map<String, ChromiumHstsPreloadedEntry> map1 = o.parseChromiumHstsPreloadedList(tempFile1.toFile());
 
 		final Path tempFile2 = createTempFileFromResource('/' + WGET_HSTS);
-		final Map<String, WgetHstsKnownHost> map2 = o.parseWgetHstsKnownHostsDatabase(tempFile2.toFile());
-		final Map<String, WgetHstsKnownHost> map3 = o.retrieveWgetHstsPreloadedHosts(map2);
+		final Map<String, WgetHstsEntry> map2 = o.parseWgetHstsKnownHostsDatabase(tempFile2.toFile());
+		final Map<String, WgetHstsEntry> map3 = o.retrieveWgetHstsPreloadedHosts(map2);
 
 		final Set<String> set = o.computeHostsToUpdate(map1, map3);
 
