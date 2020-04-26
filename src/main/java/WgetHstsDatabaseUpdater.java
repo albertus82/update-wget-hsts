@@ -49,7 +49,7 @@ public class WgetHstsDatabaseUpdater {
 		}
 		else {
 			final Properties buildInfo = loadBuildInfo();
-			System.out.printf("Typical usage: java -jar %s.jar ~/.wget-hsts https://cs.chromium.org/codesearch/f/chromium/src/net/http/transport_security_state_static.json%n", buildInfo.getProperty("project.artifactId"));
+			System.out.printf("Typical usage: java -jar %s.jar ~/.wget-hsts https://github.com/chromium/chromium/raw/master/net/http/transport_security_state_static.json%n", buildInfo.getProperty("project.artifactId"));
 		}
 	}
 
