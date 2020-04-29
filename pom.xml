@@ -181,17 +181,23 @@
 				<version>2.7</version>
 				<executions>
 					<execution>
-						<phase>verify</phase>
+						<id>plugin</id>
+						<phase>validate</phase>
 						<goals>
 							<goal>display-plugin-updates</goal>
+						</goals>
+					</execution>
+					<execution>
+						<phase>verify</phase>
+						<goals>
 							<goal>display-property-updates</goal>
 							<goal>display-dependency-updates</goal>
 						</goals>
+						<configuration>
+							<rulesUri>${project.baseUri}/maven-version-rules.xml</rulesUri>
+						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<rulesUri>file:///${project.basedir}/maven-version-rules.xml</rulesUri>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

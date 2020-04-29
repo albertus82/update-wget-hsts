@@ -1,4 +1,5 @@
-# Wget Update HSTS Database
+Wget Update HSTS Database
+=========================
 
 [![Build Status](https://github.com/albertus82/wget-update-hsts-database/workflows/build/badge.svg)](https://github.com/albertus82/wget-update-hsts-database/actions)
 [![Build Status](https://travis-ci.org/albertus82/wget-update-hsts-database.svg?branch=master)](https://travis-ci.org/albertus82/wget-update-hsts-database)
