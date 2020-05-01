@@ -21,6 +21,7 @@
 		<build.timestamp>${maven.build.timestamp}</build.timestamp>
 		<lombok.version>1.18.12</lombok.version>
 		<hamcrest.version>2.2</hamcrest.version>
+		<maven.version.rules>${project.baseUri}/maven-version-rules.xml</maven.version.rules>
 	</properties>
 
 	<profiles>
@@ -30,6 +31,7 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 		</profile>
+
 		<profile>
 			<id>delombok</id>
 			<build>
@@ -59,18 +61,21 @@
 
 	<build>
 		<finalName>${project.artifactId}</finalName>
+
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 			</resource>
 		</resources>
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.1</version>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
@@ -99,6 +104,7 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>animal-sniffer-maven-plugin</artifactId>
@@ -119,10 +125,11 @@
 					</signature>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.1.2</version>
 				<configuration>
 					<archive>
 						<manifest>
@@ -138,6 +145,7 @@
 					</archive>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -156,6 +164,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
@@ -175,27 +184,18 @@
 					</execution>
 				</executions>
 			</plugin>
+
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>versions-maven-plugin</artifactId>
 				<version>2.7</version>
 				<executions>
 					<execution>
-						<id>plugin</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>display-plugin-updates</goal>
-						</goals>
-					</execution>
-					<execution>
 						<phase>verify</phase>
 						<goals>
 							<goal>display-property-updates</goal>
 							<goal>display-dependency-updates</goal>
 						</goals>
-						<configuration>
-							<rulesUri>${project.baseUri}/maven-version-rules.xml</rulesUri>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
