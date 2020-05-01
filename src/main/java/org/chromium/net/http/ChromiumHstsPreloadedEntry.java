@@ -1,5 +1,7 @@
 package org.chromium.net.http;
 
+import java.net.URI;
+
 import com.google.gson.annotations.SerializedName;
 
 import lombok.Data;
@@ -29,6 +31,6 @@ public class ChromiumHstsPreloadedEntry {
 	private Boolean expectCt;
 
 	@SerializedName("expect_ct_report_uri")
-	private String expectCtReportUri;
+	private URI expectCtReportUri;
 
 }

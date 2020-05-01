@@ -1,5 +1,6 @@
 package org.chromium.net.http;
 
+import java.net.URI;
 import java.util.List;
 
 import com.google.gson.annotations.SerializedName;
@@ -16,7 +17,7 @@ public class ChromiumHstsPreloadedPinset {
 	private List<String> staticSpkiHashes = null;
 
 	@SerializedName("report_uri")
-	private String reportUri;
+	private URI reportUri;
 
 	@SerializedName("bad_static_spki_hashes")
 	private List<String> badStaticSpkiHashes = null;

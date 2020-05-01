@@ -10,6 +10,6 @@
     { "name": "pre.nohttps.nosub.1", "policy": "bulk-18-weeks", "include_subdomains": false },
     { "name": "pre.nohttps.nosub.2", "policy": "bulk-18-weeks", "include_subdomains": false },
     { "name": "pre.tobe.updated.1", "policy": "bulk-18-weeks", "mode": "force-https", "include_subdomains": true },
-    { "name": "pre.tobe.updated.2", "policy": "bulk-18-weeks", "mode": "force-https", "include_subdomains": false }
+    { "name": "pre.tobe.updated.2", "policy": "bulk-18-weeks", "mode": "force-https", "include_subdomains": false, "expect_ct_report_uri": "https://example.com/report" }
   ]
 }
