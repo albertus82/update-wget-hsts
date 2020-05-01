@@ -146,12 +146,13 @@ public class WgetHstsDatabaseUpdater {
 	SourceFile retrieveSourceFile(@NonNull final String source) throws IOException {
 		try {
 			final URL url = new URL(source);
-			System.out.printf("Downloading '%s'... ", url);
+			System.out.printf("Downloading '%s'", url);
 			final URLConnection connection = url.openConnection();
 			connection.setRequestProperty("Accept-Encoding", "gzip");
 			connection.setRequestProperty("Accept", "application/json,*/*;q=0.9");
 			final Path path;
 			try (final InputStream raw = connection.getInputStream(); final InputStream in = "gzip".equalsIgnoreCase(connection.getContentEncoding()) ? new GZIPInputStream(raw) : raw) {
+				System.out.print(connection.getContentEncoding() != null ? (" (Content-Encoding: " + connection.getContentEncoding() + ")... ") : "... ");
 				path = createJsonTempFile(in);
 			}
 			System.out.printf("%d kB fetched%n", path.toFile().length() / 1024);
