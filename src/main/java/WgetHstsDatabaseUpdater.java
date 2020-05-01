@@ -94,21 +94,11 @@ public class WgetHstsDatabaseUpdater {
 
 		if (!entriesToWrite.isEmpty() || !hostsToRemove.isEmpty()) {
 			System.out.print("Collecting entries to write... ");
-			final Path tempPath = createTempWgetHstsKnownHostsDatabase();
-			try (final BufferedWriter bw = Files.newBufferedWriter(tempPath, StandardOpenOption.APPEND)) {
-				final Stream<WgetHstsEntry> retained = wgetHstsKnownHostMap.values().stream().filter(e -> !hostsToRemove.contains(e.getHostname()) && !hostsToUpdate.contains(e.getHostname()));
-				final Stream<WgetHstsEntry> updated = entriesToWrite.stream().map(oe -> WgetHstsEntry.builder().hostname(oe.getName()).includeSubdomains(oe.isIncludeSubdomains() || oe.isIncludeSubdomainsForPinning()).created(Integer.MAX_VALUE).maxAge(0).build()).sorted((e1, e2) -> e1.getHostname().compareTo(e2.getHostname()));
-				Stream.concat(retained, updated).map(WgetHstsEntry::toString).forEachOrdered(l -> writeLine(bw, l));
-			}
-			catch (final Exception e) {
-				Files.deleteIfExists(tempPath);
-				throw e;
-			}
-			System.out.println("done");
+			final Path tempPath = createUpToDateWgetHstsTempFile(wgetHstsKnownHostMap.values(), hostsToRemove, hostsToUpdate, entriesToWrite);
 
 			if (destinationPath.toFile().exists()) {
 				System.out.printf("Backing up existing file '%s'... ", destinationPath);
-				final Path backupPath = backupWgetHstsKnownHostsDatabase(destinationPath);
+				final Path backupPath = backupExistingWgetHstsFile(destinationPath);
 				System.out.printf("-> '%s'%n", backupPath);
 			}
 
@@ -152,9 +142,9 @@ public class WgetHstsDatabaseUpdater {
 			connection.setRequestProperty("Accept", "application/json,*/*;q=0.9");
 			final Path path;
 			try (final InputStream raw = connection.getInputStream(); final InputStream in = "gzip".equalsIgnoreCase(connection.getContentEncoding()) ? new GZIPInputStream(raw) : raw) {
-				path = createJsonTempFile(in);
+				path = createChromiumHstsPreloadedJsonTempFile(in);
 			}
-			System.out.printf("%d kB fetched%s%n", Files.size(path) / 1024, connection.getContentEncoding() != null ? " (Content-Encoding: " + connection.getContentEncoding() + ')' : "");
+			System.out.printf("%d kB fetched%s%n", Files.size(path) / 1024, connection.getContentEncoding() != null ? " (content-encoding: " + connection.getContentEncoding() + ')' : "");
 			return new SourceFile(path, true);
 		}
 		catch (final MalformedURLException e) {
@@ -163,12 +153,12 @@ public class WgetHstsDatabaseUpdater {
 		}
 	}
 
-	Path createTempWgetHstsKnownHostsDatabase() throws IOException {
+	Path createEmptyWgetHstsTempFile() throws IOException {
 		final Path path = Files.createTempFile("wget-hsts-", null);
 		return Files.write(path, Arrays.asList("# HSTS 1.0 Known Hosts database for GNU Wget.", "# Edit at your own risk.", "# <hostname>\t<port>\t<incl. subdomains>\t<created>\t<max-age>"), StandardOpenOption.APPEND);
 	}
 
-	Path backupWgetHstsKnownHostsDatabase(@NonNull final Path wgetHstsPath) throws IOException {
+	Path backupExistingWgetHstsFile(@NonNull final Path wgetHstsPath) throws IOException {
 		Path backupPath = Paths.get(wgetHstsPath + ".bak.gz");
 		int i = 1;
 		while (backupPath.toFile().exists()) {
@@ -196,11 +186,26 @@ public class WgetHstsDatabaseUpdater {
 		}
 	}
 
-	Path createJsonTempFile(@NonNull final InputStream in) throws IOException {
+	Path createChromiumHstsPreloadedJsonTempFile(@NonNull final InputStream in) throws IOException {
 		final Path path = Files.createTempFile("hsts-", ".json");
 		Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
 		path.toFile().deleteOnExit();
 		return path;
+	}
+
+	private Path createUpToDateWgetHstsTempFile(final Collection<WgetHstsEntry> wgetHstsKnownHosts, final Collection<String> hostsToRemove, final Collection<String> hostsToUpdate, final Collection<ChromiumHstsPreloadedEntry> entriesToWrite) throws IOException {
+		final Path tempPath = createEmptyWgetHstsTempFile();
+		try (final BufferedWriter writer = Files.newBufferedWriter(tempPath, StandardOpenOption.APPEND)) {
+			final Stream<WgetHstsEntry> retained = wgetHstsKnownHosts.stream().filter(entry -> !hostsToRemove.contains(entry.getHostname()) && !hostsToUpdate.contains(entry.getHostname()));
+			final Stream<WgetHstsEntry> updated = entriesToWrite.stream().map(entry -> WgetHstsEntry.builder().hostname(entry.getName()).includeSubdomains(entry.isIncludeSubdomains() || entry.isIncludeSubdomainsForPinning()).created(Integer.MAX_VALUE).maxAge(0).build()).sorted((a, b) -> a.getHostname().compareTo(b.getHostname()));
+			Stream.concat(retained, updated).map(WgetHstsEntry::toString).forEachOrdered(line -> writeLine(writer, line));
+		}
+		catch (final Exception e) {
+			Files.deleteIfExists(tempPath);
+			throw e;
+		}
+		System.out.println("done");
+		return tempPath;
 	}
 
 	@SneakyThrows(IOException.class)
