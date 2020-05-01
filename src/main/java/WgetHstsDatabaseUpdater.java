@@ -38,7 +38,7 @@ import lombok.Value;
 import lombok.extern.java.Log;
 
 @Log
-@SuppressWarnings("java:S106")
+@SuppressWarnings("java:S106") // "Standard outputs should not be used directly to log anything"
 public class WgetHstsDatabaseUpdater {
 
 	private static final String BUILD_INFO_FILE_NAME = "/META-INF/build-info.properties";
@@ -154,7 +154,7 @@ public class WgetHstsDatabaseUpdater {
 			try (final InputStream raw = connection.getInputStream(); final InputStream in = "gzip".equalsIgnoreCase(connection.getContentEncoding()) ? new GZIPInputStream(raw) : raw) {
 				path = createJsonTempFile(in);
 			}
-			System.out.printf("%d kB fetched%s%n", Files.size(path) / 1024, connection.getContentEncoding() != null ? "(Content-Encoding: " + connection.getContentEncoding() + ')' : "");
+			System.out.printf("%d kB fetched%s%n", Files.size(path) / 1024, connection.getContentEncoding() != null ? " (Content-Encoding: " + connection.getContentEncoding() + ')' : "");
 			return new SourceFile(path, true);
 		}
 		catch (final MalformedURLException e) {
