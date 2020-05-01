@@ -1,10 +1,10 @@
 package org.gnu.wget;
 
 import lombok.Builder;
+import lombok.Data;
 import lombok.NonNull;
-import lombok.Value;
 
-@Value
+@Data
 @Builder
 public class WgetHstsEntry {
 
