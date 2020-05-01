@@ -213,7 +213,7 @@ public class WgetHstsDatabaseUpdaterTest {
 		MatcherAssert.assertThat(x.toString(), endsWith(".bak.gz"));
 		Assert.assertTrue(x.toFile().exists());
 		Assert.assertTrue(Files.isRegularFile(x));
-		MatcherAssert.assertThat(x.toFile().length(), greaterThan(0L));
+		MatcherAssert.assertThat(Files.size(x), greaterThan(0L));
 
 		final Path y = instance.backupExistingWgetHstsFile(tempFile);
 		log.log(INFO, "Created temp file ''{0}''", y);
@@ -221,7 +221,7 @@ public class WgetHstsDatabaseUpdaterTest {
 		MatcherAssert.assertThat(y.toString(), endsWith(".bak.1.gz"));
 		Assert.assertTrue(y.toFile().exists());
 		Assert.assertTrue(Files.isRegularFile(y));
-		MatcherAssert.assertThat(y.toFile().length(), greaterThan(0L));
+		MatcherAssert.assertThat(Files.size(y), greaterThan(0L));
 
 		final Path z = instance.backupExistingWgetHstsFile(tempFile);
 		log.log(INFO, "Created temp file ''{0}''", z);
@@ -229,7 +229,7 @@ public class WgetHstsDatabaseUpdaterTest {
 		MatcherAssert.assertThat(z.toString(), endsWith(".bak.2.gz"));
 		Assert.assertTrue(z.toFile().exists());
 		Assert.assertTrue(Files.isRegularFile(z));
-		MatcherAssert.assertThat(z.toFile().length(), greaterThan(0L));
+		MatcherAssert.assertThat(Files.size(z), greaterThan(0L));
 	}
 
 	@Test
@@ -241,8 +241,9 @@ public class WgetHstsDatabaseUpdaterTest {
 		instance.execute(tempFile2.toString(), tempFile1.toString());
 
 		final Path backupFile = Paths.get(tempFile2.toString() + ".bak.gz");
-		if (backupFile.toFile().lastModified() < t) {
-			throw new IllegalStateException(backupFile.toFile().lastModified() + " < " + t);
+		final long lastModifiedTime = Files.getLastModifiedTime(backupFile).toMillis();
+		if (lastModifiedTime < t) {
+			throw new IllegalStateException(lastModifiedTime + " < " + t);
 		}
 		tempFiles.add(backupFile);
 		Assert.assertTrue(Files.exists(backupFile));
@@ -281,7 +282,7 @@ public class WgetHstsDatabaseUpdaterTest {
 			tempFiles.add(x);
 			MatcherAssert.assertThat(x.toString(), endsWith(".json"));
 			final Path y = createTempFileFromResource('/' + TRANSPORT_SECURITY_STATE_STATIC_JSON);
-			Assert.assertEquals(Files.size(y), x.toFile().length());
+			Assert.assertEquals(Files.size(y), Files.size(x));
 		}
 	}
 

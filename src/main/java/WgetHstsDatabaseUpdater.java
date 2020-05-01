@@ -160,9 +160,8 @@ public class WgetHstsDatabaseUpdater {
 
 	Path backupExistingWgetHstsFile(@NonNull final Path wgetHstsPath) throws IOException {
 		Path backupPath = Paths.get(wgetHstsPath + ".bak.gz");
-		int i = 1;
-		while (backupPath.toFile().exists()) {
-			backupPath = Paths.get(wgetHstsPath + ".bak." + i++ + ".gz");
+		for (int i = 1; backupPath.toFile().exists(); i++) {
+			backupPath = Paths.get(wgetHstsPath + ".bak." + i + ".gz");
 		}
 		try (final OutputStream fos = Files.newOutputStream(backupPath); final OutputStream gzos = new GZIPOutputStream(fos)) {
 			Files.copy(wgetHstsPath, gzos);
