@@ -4,6 +4,7 @@ Wget Update HSTS Database
 [![Build Status](https://github.com/albertus82/wget-update-hsts-database/workflows/build/badge.svg)](https://github.com/albertus82/wget-update-hsts-database/actions)
 [![Build Status](https://travis-ci.org/albertus82/wget-update-hsts-database.svg?branch=master)](https://travis-ci.org/albertus82/wget-update-hsts-database)
 [![Build status](https://ci.appveyor.com/api/projects/status/github/albertus82/wget-update-hsts-database?branch=master&svg=true)](https://ci.appveyor.com/project/albertus82/wget-update-hsts-database)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=it.albertus%3Awget-update-hsts-database&metric=alert_status)](https://sonarcloud.io/dashboard?id=it.albertus%3Awget-update-hsts-database)
 
 Import preloaded *HTTP Strict Transport Security* (HSTS) domains into GNU Wget.
 
