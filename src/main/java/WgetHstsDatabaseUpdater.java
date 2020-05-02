@@ -144,7 +144,8 @@ public class WgetHstsDatabaseUpdater {
 			try (final InputStream raw = connection.getInputStream(); final InputStream in = "gzip".equalsIgnoreCase(connection.getContentEncoding()) ? new GZIPInputStream(raw) : raw) {
 				path = createChromiumHstsPreloadedJsonTempFile(in);
 			}
-			System.out.printf("%d kB fetched%s%n", Files.size(path) / 1024, connection.getContentEncoding() != null ? " (content-encoding: " + connection.getContentEncoding() + ')' : "");
+			System.out.printf("%d kB fetched%n", Files.size(path) / 1024);
+			log.log(Level.FINE, "Content-Encoding: {0}", connection.getContentEncoding());
 			return new SourceFile(path, true);
 		}
 		catch (final MalformedURLException e) {
