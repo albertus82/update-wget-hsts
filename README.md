@@ -31,7 +31,7 @@ git clone https://github.com/albertus82/wget-update-hsts-database.git
 cd wget-update-hsts-database
 mvn clean verify
 cd target
-java -jar wget-update-hsts-database.jar ~/.wget-hsts https://cs.chromium.org/codesearch/f/chromium/src/net/http/transport_security_state_static.json
+java -jar wget-update-hsts-database.jar ~/.wget-hsts https://github.com/chromium/chromium/raw/master/net/http/transport_security_state_static.json
 ```
 
 ### Output
