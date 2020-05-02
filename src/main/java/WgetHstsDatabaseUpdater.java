@@ -220,7 +220,7 @@ public class WgetHstsDatabaseUpdater {
 		writer.newLine();
 	}
 
-	private static Properties loadBuildInfo() {
+	static Properties loadBuildInfo() {
 		final Properties properties = new Properties();
 		try (final InputStream is = WgetHstsDatabaseUpdater.class.getResourceAsStream(BUILD_INFO_FILE_NAME)) {
 			if (is != null) {
