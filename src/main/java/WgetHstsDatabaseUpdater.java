@@ -17,10 +17,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
@@ -95,6 +96,7 @@ public class WgetHstsDatabaseUpdater {
 		if (!entriesToWrite.isEmpty() || !hostsToRemove.isEmpty()) {
 			System.out.print("Collecting entries to write... ");
 			final Path tempPath = createUpToDateWgetHstsTempFile(wgetHstsKnownHostMap.values(), hostsToRemove, hostsToUpdate, entriesToWrite);
+			System.out.println("done");
 
 			if (destinationPath.toFile().exists()) {
 				System.out.printf("Backing up existing file '%s'... ", destinationPath);
@@ -114,23 +116,23 @@ public class WgetHstsDatabaseUpdater {
 		}
 	}
 
-	Collection<ChromiumHstsPreloadedEntry> computeEntriesToWrite(final Map<String, ChromiumHstsPreloadedEntry> chromiumHstsPreloadedEntryMap, final Map<String, WgetHstsEntry> wgetHstsKnownHostMap, final Set<String> hostsToUpdate) {
-		return chromiumHstsPreloadedEntryMap.values().stream().filter(e -> "force-https".equalsIgnoreCase(e.getMode()) && (!wgetHstsKnownHostMap.containsKey(e.getName()) || hostsToUpdate.contains(e.getName()))).collect(Collectors.toList());
+	Collection<ChromiumHstsPreloadedEntry> computeEntriesToWrite(final Map<String, ChromiumHstsPreloadedEntry> chromiumHostMap, final Map<String, WgetHstsEntry> wgetHostMap, final Set<String> hostsToUpdate) {
+		return chromiumHostMap.values().stream().filter(chromiumHost -> "force-https".equalsIgnoreCase(chromiumHost.getMode()) && (!wgetHostMap.containsKey(chromiumHost.getName()) || hostsToUpdate.contains(chromiumHost.getName()))).collect(Collectors.toList());
 	}
 
-	Set<String> computeHostsToUpdate(@NonNull final Map<String, ChromiumHstsPreloadedEntry> chromiumHstsPreloadedEntryMap, @NonNull final Map<String, WgetHstsEntry> wgetHstsPreloadedHostMap) {
-		return wgetHstsPreloadedHostMap.entrySet().stream().filter(e -> {
-			final ChromiumHstsPreloadedEntry preloadedEntry = chromiumHstsPreloadedEntryMap.get(e.getKey());
-			return preloadedEntry != null && (preloadedEntry.isIncludeSubdomains() || preloadedEntry.isIncludeSubdomainsForPinning()) != e.getValue().isIncludeSubdomains();
-		}).map(Entry::getKey).collect(Collectors.toSet());
+	Set<String> computeHostsToUpdate(@NonNull final Map<String, ChromiumHstsPreloadedEntry> chromiumHostMap, @NonNull final Map<String, WgetHstsEntry> wgetHostMap) {
+		return wgetHostMap.values().stream().filter(wgetHost -> {
+			final ChromiumHstsPreloadedEntry chromiumHost = chromiumHostMap.get(wgetHost.getHostname());
+			return chromiumHost != null && (chromiumHost.isIncludeSubdomains() || chromiumHost.isIncludeSubdomainsForPinning()) != wgetHost.isIncludeSubdomains();
+		}).map(WgetHstsEntry::getHostname).collect(Collectors.toSet());
 	}
 
-	Set<String> computeHostsToRemove(@NonNull final Set<String> chromiumHstsPreloadedHosts, @NonNull final Set<String> wgetHstsPreloadedHosts) {
-		return wgetHstsPreloadedHosts.stream().filter(wgetPreloadedHost -> !chromiumHstsPreloadedHosts.contains(wgetPreloadedHost)).collect(Collectors.toSet());
+	Set<String> computeHostsToRemove(@NonNull final Set<String> chromiumHosts, @NonNull final Set<String> wgetHosts) {
+		return wgetHosts.stream().filter(wgetHost -> !chromiumHosts.contains(wgetHost)).collect(Collectors.toSet());
 	}
 
-	Map<String, WgetHstsEntry> retrieveWgetHstsPreloadedHosts(final Map<String, WgetHstsEntry> wgetHstsKnownHostMap) {
-		return wgetHstsKnownHostMap.entrySet().stream().filter(e -> e.getValue().getCreated() == Integer.MAX_VALUE && e.getValue().getMaxAge() == 0).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+	Map<String, WgetHstsEntry> retrieveWgetHstsPreloadedHosts(final Map<String, WgetHstsEntry> wgetHostMap) {
+		return wgetHostMap.values().stream().filter(wgetHost -> wgetHost.getCreated() == Integer.MAX_VALUE && wgetHost.getMaxAge() == 0).collect(Collectors.toMap(WgetHstsEntry::getHostname, Function.identity()));
 	}
 
 	SourceFile retrieveSourceFile(@NonNull final String source) throws IOException {
@@ -177,12 +179,14 @@ public class WgetHstsDatabaseUpdater {
 		try (final BufferedReader br = Files.newBufferedReader(transportSecurityStateStaticJson)) {
 			root = new Gson().fromJson(br, ChromiumHstsPreloadedList.class);
 		}
-		return root.getEntries().stream().collect(Collectors.toMap(ChromiumHstsPreloadedEntry::getName, e -> e));
+		return root.getEntries().stream().collect(Collectors.toMap(ChromiumHstsPreloadedEntry::getName, Function.identity()));
 	}
 
 	Map<String, WgetHstsEntry> parseWgetHstsKnownHostsDatabase(@NonNull final Path wgetHstsFile) throws IOException {
+		final Pattern splitPattern = Pattern.compile("[\\t\\s]+");
 		try (final Stream<String> lines = Files.lines(wgetHstsFile)) {
-			return lines.map(String::trim).filter(l -> !l.startsWith("#")).map(l -> l.split("[\\t\\s]+")).filter(a -> a.length == 5).map(a -> WgetHstsEntry.builder().hostname(a[0].trim()).port(Integer.parseInt(a[1].trim())).includeSubdomains("1".equals(a[2].trim())).created(Integer.parseInt(a[3].trim())).maxAge(Integer.parseInt(a[4].trim())).build()).collect(Collectors.toMap(WgetHstsEntry::getHostname, e -> e, (k, v) -> {
+			final Stream<String[]> fieldStream = lines.map(String::trim).filter(line -> !line.startsWith("#")).map(splitPattern::split).filter(fields -> fields.length == 5);
+			return fieldStream.map(fields -> WgetHstsEntry.builder().hostname(fields[0].trim()).port(Integer.parseInt(fields[1].trim())).includeSubdomains("1".equals(fields[2].trim())).created(Integer.parseInt(fields[3].trim())).maxAge(Integer.parseInt(fields[4].trim())).build()).collect(Collectors.toMap(WgetHstsEntry::getHostname, Function.identity(), (k, v) -> {
 				throw new IllegalStateException("Duplicate key " + k);
 			}, LinkedHashMap::new));
 		}
@@ -197,21 +201,21 @@ public class WgetHstsDatabaseUpdater {
 
 	private Path createUpToDateWgetHstsTempFile(final Collection<WgetHstsEntry> wgetHstsKnownHosts, final Collection<String> hostsToRemove, final Collection<String> hostsToUpdate, final Collection<ChromiumHstsPreloadedEntry> entriesToWrite) throws IOException {
 		final Path tempPath = createEmptyWgetHstsTempFile();
+		final Stream<WgetHstsEntry> retained = wgetHstsKnownHosts.stream().filter(entry -> !hostsToRemove.contains(entry.getHostname()) && !hostsToUpdate.contains(entry.getHostname()));
+		final Stream<WgetHstsEntry> updated = entriesToWrite.stream().map(entry -> WgetHstsEntry.builder().hostname(entry.getName()).includeSubdomains(entry.isIncludeSubdomains() || entry.isIncludeSubdomainsForPinning()).created(Integer.MAX_VALUE).maxAge(0).build()).sorted((a, b) -> a.getHostname().compareTo(b.getHostname()));
+		final Stream<String> linesStream = Stream.concat(retained, updated).map(WgetHstsEntry::toString);
 		try (final BufferedWriter writer = Files.newBufferedWriter(tempPath, StandardOpenOption.APPEND)) {
-			final Stream<WgetHstsEntry> retained = wgetHstsKnownHosts.stream().filter(entry -> !hostsToRemove.contains(entry.getHostname()) && !hostsToUpdate.contains(entry.getHostname()));
-			final Stream<WgetHstsEntry> updated = entriesToWrite.stream().map(entry -> WgetHstsEntry.builder().hostname(entry.getName()).includeSubdomains(entry.isIncludeSubdomains() || entry.isIncludeSubdomainsForPinning()).created(Integer.MAX_VALUE).maxAge(0).build()).sorted((a, b) -> a.getHostname().compareTo(b.getHostname()));
-			Stream.concat(retained, updated).map(WgetHstsEntry::toString).forEachOrdered(line -> writeLine(writer, line));
+			linesStream.forEachOrdered(line -> writeLine(writer, line));
 		}
 		catch (final Exception e) {
 			Files.deleteIfExists(tempPath);
 			throw e;
 		}
-		System.out.println("done");
 		return tempPath;
 	}
 
 	@SneakyThrows(IOException.class)
-	private static void writeLine(@NonNull final BufferedWriter writer, @NonNull final String line) {
+	private void writeLine(@NonNull final BufferedWriter writer, @NonNull final String line) {
 		writer.write(line);
 		writer.newLine();
 	}
