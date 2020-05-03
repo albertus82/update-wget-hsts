@@ -60,7 +60,7 @@ class WgetHstsDatabaseUpdaterTest {
 	}
 
 	@AfterAll
-	static void afterAll() {
+	static void afterAll(final MockServerClient client) {
 		tempFiles.forEach(f -> {
 			try {
 				Files.delete(f);
@@ -71,6 +71,7 @@ class WgetHstsDatabaseUpdaterTest {
 				f.toFile().deleteOnExit();
 			}
 		});
+		client.stop();
 	}
 
 	@Test
