@@ -45,7 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @ExtendWith(MockServerExtension.class)
-public class WgetHstsDatabaseUpdaterTest {
+class WgetHstsDatabaseUpdaterTest {
 
 	private static final String TRANSPORT_SECURITY_STATE_STATIC_JSON = "transport_security_state_static.json";
 	private static final String WGET_HSTS = "wget-hsts";
@@ -55,12 +55,12 @@ public class WgetHstsDatabaseUpdaterTest {
 	private static WgetHstsDatabaseUpdater instance;
 
 	@BeforeAll
-	static void beforeClass() {
+	static void beforeAll() {
 		instance = new WgetHstsDatabaseUpdater();
 	}
 
 	@AfterAll
-	static void afterClass() {
+	static void afterAll() {
 		tempFiles.forEach(f -> {
 			try {
 				Files.delete(f);
