@@ -189,29 +189,12 @@
 					</execution>
 				</executions>
 			</plugin>
-
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>versions-maven-plugin</artifactId>
-				<version>2.7</version>
-				<executions>
-					<execution>
-						<phase>verify</phase>
-						<goals>
-							<goal>display-property-updates</goal>
-							<goal>display-dependency-updates</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<version>3.0.0</version>
 				<executions>
 					<execution>
-					<?m2e execute?>
 						<id>lombok-config</id>
 						<phase>initialize</phase>
 						<goals>
@@ -225,6 +208,22 @@
 								</propertyfile>
 							</target>
 						</configuration>
+						<?m2e execute?>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>versions-maven-plugin</artifactId>
+				<version>2.7</version>
+				<executions>
+					<execution>
+						<phase>verify</phase>
+						<goals>
+							<goal>display-property-updates</goal>
+							<goal>display-dependency-updates</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>
