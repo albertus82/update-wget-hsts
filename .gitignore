@@ -3,4 +3,4 @@
 .project
 .settings/
 /bin/
-/lombok.config
+lombok.config
