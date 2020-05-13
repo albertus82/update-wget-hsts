@@ -21,6 +21,7 @@
 		<build.timestamp>${maven.build.timestamp}</build.timestamp>
 		<lombok.version>1.18.12</lombok.version>
 		<maven.version.rules>${project.baseUri}/maven-version-rules.xml</maven.version.rules>
+		<project.build.outputTimestamp>${git.commit.time}</project.build.outputTimestamp>
 	</properties>
 
 	<profiles>
@@ -69,6 +70,23 @@
 		</resources>
 
 		<plugins>
+			<plugin>
+				<groupId>pl.project13.maven</groupId>
+				<artifactId>git-commit-id-plugin</artifactId>
+				<version>4.0.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>revision</goal>
+						</goals>
+						<phase>initialize</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<dateFormat>yyyy-MM-dd'T'HH:mm:ss'Z'</dateFormat>
+				</configuration>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -134,7 +152,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.1.2</version>
+				<version>3.2.0</version>
 				<configuration>
 					<archive>
 						<manifest>
