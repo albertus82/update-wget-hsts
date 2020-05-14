@@ -18,7 +18,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<main.class>WgetHstsDatabaseUpdater</main.class>
 		<dependency.dir>lib</dependency.dir>
-		<build.timestamp>${maven.build.timestamp}</build.timestamp>
 		<lombok.version>1.18.12</lombok.version>
 		<maven.version.rules>${project.baseUri}/maven-version-rules.xml</maven.version.rules>
 		<project.build.outputTimestamp>${git.commit.time}</project.build.outputTimestamp>
