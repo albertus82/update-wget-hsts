@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -37,21 +38,30 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.extern.java.Log;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.IVersionProvider;
+import picocli.CommandLine.Parameters;
 
 @Log
 @SuppressWarnings("java:S106") // "Standard outputs should not be used directly to log anything"
-public class WgetHstsDatabaseUpdater {
+@Command(name = "wget-update-hsts-database", description = "Import preloaded HTTP Strict Transport Security (HSTS) domains into GNU Wget.", footer = "Typical usage: java -jar wget-update-hsts-database.jar ~/.wget-hsts https://github.com/chromium/chromium/raw/master/net/http/transport_security_state_static.json", usageHelpWidth = 255, mixinStandardHelpOptions = true, versionProvider = VersionProvider.class)
+public class WgetHstsDatabaseUpdater implements Callable<Integer> {
 
-	private static final String BUILD_INFO_FILE_NAME = "/META-INF/build-info.properties";
+	@Parameters(index = "0", description = "Destination file")
+	private String destination;
 
-	public static void main(final String... args) throws IOException {
-		if (args.length == 2) {
-			new WgetHstsDatabaseUpdater().execute(args[0], args[1]);
-		}
-		else {
-			final Properties buildInfo = loadBuildInfo();
-			System.out.printf("Typical usage: java -jar %s.jar ~/.wget-hsts https://github.com/chromium/chromium/raw/master/net/http/transport_security_state_static.json%n", buildInfo.getProperty("project.artifactId"));
-		}
+	@Parameters(index = "1", description = "Source file or URL")
+	private String source;
+
+	@Override
+	public Integer call() throws IOException {
+		new WgetHstsDatabaseUpdater().execute(destination, source);
+		return 0;
+	}
+
+	public static void main(String[] args) {
+		new CommandLine(new WgetHstsDatabaseUpdater()).execute(args);
 	}
 
 	void execute(@NonNull final String destination, @NonNull final String source) throws IOException {
@@ -220,6 +230,24 @@ public class WgetHstsDatabaseUpdater {
 		writer.newLine();
 	}
 
+	@Value
+	static class SourceFile {
+		Path path;
+		boolean temp;
+	}
+}
+
+@Log
+class VersionProvider implements IVersionProvider {
+
+	private static final String BUILD_INFO_FILE_NAME = "/META-INF/build-info.properties";
+
+	@Override
+	public String[] getVersion() throws Exception {
+		final Properties buildInfo = loadBuildInfo();
+		return new String[] { buildInfo.getProperty("project.artifactId") + " v" + buildInfo.getProperty("project.version") };
+	}
+
 	static Properties loadBuildInfo() {
 		final Properties properties = new Properties();
 		try (final InputStream is = WgetHstsDatabaseUpdater.class.getResourceAsStream(BUILD_INFO_FILE_NAME)) {
@@ -231,11 +259,5 @@ public class WgetHstsDatabaseUpdater {
 			log.log(Level.SEVERE, "Cannot read class path resource:" + BUILD_INFO_FILE_NAME, e);
 		}
 		return properties;
-	}
-
-	@Value
-	static class SourceFile {
-		Path path;
-		boolean temp;
 	}
 }
