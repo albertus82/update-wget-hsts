@@ -56,11 +56,11 @@ public class WgetHstsDatabaseUpdater implements Callable<Integer> {
 		new CommandLine(new WgetHstsDatabaseUpdater()).setCommandName(BuildInfo.getProperties().getProperty("project.artifactId")).execute(args);
 	}
 
-	@Parameters(index = "0", description = "Destination file")
+	@Parameters(index = "0", description = "The 'wget-hsts' file to write/update.")
 	@Setter(value = AccessLevel.PACKAGE)
 	private Path destination;
 
-	@Parameters(index = "1", description = "Source file or URL")
+	@Parameters(index = "1", description = "The 'transport_security_state_static.json' file, or a URL pointing to it.")
 	@Setter(value = AccessLevel.PACKAGE)
 	private String source;
 
