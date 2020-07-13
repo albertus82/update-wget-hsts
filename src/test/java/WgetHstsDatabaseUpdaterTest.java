@@ -321,7 +321,7 @@ class WgetHstsDatabaseUpdaterTest {
 		final Path outFile = createTempFileFromResource('/' + WGET_HSTS);
 
 		final long t = System.currentTimeMillis() - 999;
-		instance.execute(outFile.toString(), source);
+		instance.execute(outFile, source);
 
 		final Path backupFile = Paths.get(outFile.toString() + ".bak.gz");
 		final long lastModifiedTime = Files.getLastModifiedTime(backupFile).toMillis();

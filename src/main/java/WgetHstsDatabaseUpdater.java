@@ -48,8 +48,12 @@ import picocli.CommandLine.Parameters;
 @Command(name = "wget-update-hsts-database", description = "Import preloaded HTTP Strict Transport Security (HSTS) domains into GNU Wget.", footer = "Typical usage: java -jar wget-update-hsts-database.jar ~/.wget-hsts https://github.com/chromium/chromium/raw/master/net/http/transport_security_state_static.json", usageHelpWidth = 255, mixinStandardHelpOptions = true, versionProvider = VersionProvider.class)
 public class WgetHstsDatabaseUpdater implements Callable<Integer> {
 
+	public static void main(final String... args) {
+		new CommandLine(new WgetHstsDatabaseUpdater()).execute(args);
+	}
+
 	@Parameters(index = "0", description = "Destination file")
-	private String destination;
+	private Path destination;
 
 	@Parameters(index = "1", description = "Source file or URL")
 	private String source;
@@ -60,11 +64,7 @@ public class WgetHstsDatabaseUpdater implements Callable<Integer> {
 		return 0;
 	}
 
-	public static void main(String[] args) {
-		new CommandLine(new WgetHstsDatabaseUpdater()).execute(args);
-	}
-
-	void execute(@NonNull final String destination, @NonNull final String source) throws IOException {
+	void execute(@NonNull final Path destinationPath, @NonNull final String source) throws IOException {
 		final SourceFile sourceFile = retrieveSourceFile(source);
 		System.out.printf("Parsing source file '%s'... ", sourceFile.getPath());
 		final Map<String, ChromiumHstsPreloadedEntry> chromiumHstsPreloadedEntryMap = parseChromiumHstsPreloadedList(sourceFile.getPath());
@@ -72,8 +72,6 @@ public class WgetHstsDatabaseUpdater implements Callable<Integer> {
 			Files.delete(sourceFile.getPath());
 		}
 		System.out.printf("%d entries found%n", chromiumHstsPreloadedEntryMap.size());
-
-		final Path destinationPath = Paths.get(destination);
 
 		final Map<String, WgetHstsEntry> wgetHstsKnownHostMap;
 		final Set<String> hostsToRemove;
