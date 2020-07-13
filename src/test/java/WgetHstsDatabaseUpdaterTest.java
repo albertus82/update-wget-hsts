@@ -315,8 +315,13 @@ class WgetHstsDatabaseUpdaterTest {
 	@Test
 	void testVersionProvider() {
 		final VersionProvider vp = new VersionProvider();
-		Assertions.assertNotEquals(0, vp.loadBuildInfo().size());
 		Assertions.assertNotEquals(0, vp.getVersion().length);
+
+	}
+
+	@Test
+	void testBuildInfo() {
+		Assertions.assertNotEquals(0, BuildInfo.getProperties().size());
 
 	}
 

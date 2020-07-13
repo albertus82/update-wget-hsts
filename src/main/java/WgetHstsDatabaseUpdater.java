@@ -34,6 +34,9 @@ import org.gnu.wget.WgetHstsEntry;
 
 import com.google.gson.Gson;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.Value;
@@ -45,11 +48,11 @@ import picocli.CommandLine.Parameters;
 
 @Log
 @SuppressWarnings("java:S106") // "Standard outputs should not be used directly to log anything"
-@Command(name = "wget-update-hsts-database", description = "Import preloaded HTTP Strict Transport Security (HSTS) domains into GNU Wget.", footer = "Typical usage: java -jar wget-update-hsts-database.jar ~/.wget-hsts https://github.com/chromium/chromium/raw/master/net/http/transport_security_state_static.json", usageHelpWidth = 255, mixinStandardHelpOptions = true, versionProvider = VersionProvider.class)
+@Command(description = "Import preloaded HTTP Strict Transport Security (HSTS) domains into GNU Wget.", footer = "Typical usage: java -jar wget-update-hsts-database.jar ~/.wget-hsts https://github.com/chromium/chromium/raw/master/net/http/transport_security_state_static.json", usageHelpWidth = 255, mixinStandardHelpOptions = true, versionProvider = VersionProvider.class)
 public class WgetHstsDatabaseUpdater implements Callable<Integer> {
 
 	public static void main(final String... args) {
-		new CommandLine(new WgetHstsDatabaseUpdater()).execute(args);
+		new CommandLine(new WgetHstsDatabaseUpdater()).setCommandName(BuildInfo.getProperties().getProperty("project.artifactId")).execute(args);
 	}
 
 	@Parameters(index = "0", description = "Destination file")
@@ -235,20 +238,26 @@ public class WgetHstsDatabaseUpdater implements Callable<Integer> {
 	}
 }
 
-@Log
 class VersionProvider implements IVersionProvider {
-
-	private static final String BUILD_INFO_FILE_NAME = "/META-INF/build-info.properties";
 
 	@Override
 	public String[] getVersion() {
-		final Properties buildInfo = loadBuildInfo();
+		final Properties buildInfo = BuildInfo.getProperties();
 		return new String[] { buildInfo.getProperty("project.artifactId") + " v" + buildInfo.getProperty("project.version") };
 	}
+}
 
-	Properties loadBuildInfo() {
-		final Properties properties = new Properties();
-		try (final InputStream is = getClass().getResourceAsStream(BUILD_INFO_FILE_NAME)) {
+@Log
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+class BuildInfo {
+
+	private static final String BUILD_INFO_FILE_NAME = "/META-INF/build-info.properties";
+
+	@Getter
+	private static final Properties properties = new Properties();
+
+	static {
+		try (final InputStream is = BuildInfo.class.getResourceAsStream(BUILD_INFO_FILE_NAME)) {
 			if (is != null) {
 				properties.load(is);
 			}
@@ -256,6 +265,5 @@ class VersionProvider implements IVersionProvider {
 		catch (final Exception e) {
 			log.log(Level.SEVERE, "Cannot read class path resource:" + BUILD_INFO_FILE_NAME, e);
 		}
-		return properties;
 	}
 }
