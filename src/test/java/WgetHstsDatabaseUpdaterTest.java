@@ -313,8 +313,11 @@ class WgetHstsDatabaseUpdaterTest {
 	}
 
 	@Test
-	void testLoadBuildInfo() {
-		Assertions.assertNotEquals(0, VersionProvider.loadBuildInfo().size());
+	void testVersionProvider() {
+		final VersionProvider vp = new VersionProvider();
+		Assertions.assertNotEquals(0, vp.loadBuildInfo().size());
+		Assertions.assertNotEquals(0, vp.getVersion().length);
+
 	}
 
 	private void testExecute(final String source) throws IOException {

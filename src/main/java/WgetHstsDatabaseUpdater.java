@@ -241,14 +241,14 @@ class VersionProvider implements IVersionProvider {
 	private static final String BUILD_INFO_FILE_NAME = "/META-INF/build-info.properties";
 
 	@Override
-	public String[] getVersion() throws Exception {
+	public String[] getVersion() {
 		final Properties buildInfo = loadBuildInfo();
 		return new String[] { buildInfo.getProperty("project.artifactId") + " v" + buildInfo.getProperty("project.version") };
 	}
 
-	static Properties loadBuildInfo() {
+	Properties loadBuildInfo() {
 		final Properties properties = new Properties();
-		try (final InputStream is = WgetHstsDatabaseUpdater.class.getResourceAsStream(BUILD_INFO_FILE_NAME)) {
+		try (final InputStream is = getClass().getResourceAsStream(BUILD_INFO_FILE_NAME)) {
 			if (is != null) {
 				properties.load(is);
 			}
