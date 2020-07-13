@@ -38,6 +38,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.extern.java.Log;
@@ -56,9 +57,11 @@ public class WgetHstsDatabaseUpdater implements Callable<Integer> {
 	}
 
 	@Parameters(index = "0", description = "Destination file")
+	@Setter(value = AccessLevel.PACKAGE)
 	private Path destination;
 
 	@Parameters(index = "1", description = "Source file or URL")
+	@Setter(value = AccessLevel.PACKAGE)
 	private String source;
 
 	@Override

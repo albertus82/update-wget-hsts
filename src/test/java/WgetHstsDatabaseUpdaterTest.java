@@ -278,6 +278,13 @@ class WgetHstsDatabaseUpdaterTest {
 	}
 
 	@Test
+	void testCall() throws IOException {
+		Assertions.assertThrows(NullPointerException.class, instance::call);
+		instance.setDestination(Paths.get(""));
+		Assertions.assertThrows(NullPointerException.class, instance::call);
+	}
+
+	@Test
 	void testExecuteWithFile() throws IOException {
 		final Path tempFile1 = createTempFileFromResource('/' + TRANSPORT_SECURITY_STATE_STATIC_JSON);
 		testExecute(tempFile1.toString());
