@@ -53,7 +53,7 @@ import picocli.CommandLine.Parameters;
 public class WgetHstsDatabaseUpdater implements Callable<Integer> {
 
 	public static void main(final String... args) {
-		new CommandLine(new WgetHstsDatabaseUpdater()).setCommandName(BuildInfo.getProperties().getProperty("project.artifactId")).execute(args);
+		System.exit(new CommandLine(new WgetHstsDatabaseUpdater()).setCommandName(BuildInfo.getProperties().getProperty("project.artifactId")).execute(args));
 	}
 
 	@Parameters(index = "0", description = "The 'wget-hsts' file to write/update.")
