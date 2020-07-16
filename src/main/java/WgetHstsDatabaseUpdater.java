@@ -3,6 +3,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -242,31 +243,24 @@ public class WgetHstsDatabaseUpdater implements Callable<Integer> {
 }
 
 class VersionProvider implements IVersionProvider {
-
 	@Override
 	public String[] getVersion() {
-		final Properties buildInfo = BuildInfo.getProperties();
-		return new String[] { buildInfo.getProperty("project.artifactId") + " v" + buildInfo.getProperty("project.version") };
+		return new String[] { "${COMMAND-FULL-NAME} v" + BuildInfo.getProperties().getProperty("project.version") };
 	}
 }
 
-@Log
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 class BuildInfo {
-
-	private static final String BUILD_INFO_FILE_NAME = "/META-INF/build-info.properties";
 
 	@Getter
 	private static final Properties properties = new Properties();
 
 	static {
-		try (final InputStream is = BuildInfo.class.getResourceAsStream(BUILD_INFO_FILE_NAME)) {
-			if (is != null) {
-				properties.load(is);
-			}
+		try (final InputStream is = BuildInfo.class.getResourceAsStream("/META-INF/build-info.properties")) {
+			properties.load(is);
 		}
-		catch (final Exception e) {
-			log.log(Level.SEVERE, "Cannot read class path resource:" + BUILD_INFO_FILE_NAME, e);
+		catch (final IOException e) {
+			throw new UncheckedIOException(e);
 		}
 	}
 }
