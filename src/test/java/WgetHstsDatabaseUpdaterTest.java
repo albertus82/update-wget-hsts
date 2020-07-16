@@ -40,6 +40,7 @@ import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 import org.mockserver.model.JsonBody;
 import org.mockserver.model.MediaType;
+import org.mockserver.model.StringBody;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -228,7 +229,7 @@ class WgetHstsDatabaseUpdaterTest {
 		final String uncompressedPath = "/testRetrieveSourceFileRemote/uncompressed.json";
 		final String compressedPath = "/testRetrieveSourceFileRemote/compressed.json";
 
-		client.when(new HttpRequest().withMethod("GET").withPath(uncompressedPath)).respond(new HttpResponse().withStatusCode(200).withBody(new JsonBody(uncompressedResponseBody)));
+		client.when(new HttpRequest().withMethod("GET").withPath(uncompressedPath)).respond(new HttpResponse().withStatusCode(200).withBody(new StringBody(uncompressedResponseBody, MediaType.APPLICATION_JSON_UTF_8)));
 		client.when(new HttpRequest().withMethod("GET").withPath(compressedPath).withHeader("Accept-Encoding", "gzip")).respond(new HttpResponse().withStatusCode(200).withHeader("Content-Encoding", "gzip").withBody(new BinaryBody(compressedResponseBody, MediaType.APPLICATION_JSON_UTF_8)));
 
 		final InetSocketAddress remoteAddress = client.remoteAddress();
