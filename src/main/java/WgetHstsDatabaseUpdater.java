@@ -50,7 +50,7 @@ import picocli.CommandLine.Parameters;
 
 @Log
 @SuppressWarnings("java:S106") // "Standard outputs should not be used directly to log anything"
-@Command(description = "Import preloaded HTTP Strict Transport Security (HSTS) domains into GNU Wget.", footer = "Typical usage: java -jar wget-update-hsts-database.jar ~/.wget-hsts https://github.com/chromium/chromium/raw/master/net/http/transport_security_state_static.json", usageHelpWidth = 255, mixinStandardHelpOptions = true, versionProvider = VersionProvider.class)
+@Command(description = "Import preloaded HTTP Strict Transport Security (HSTS) domains into GNU Wget.", footer = "Typical usage: java -jar ${COMMAND-FULL-NAME}.jar ~/.wget-hsts https://github.com/chromium/chromium/raw/master/net/http/transport_security_state_static.json", usageHelpWidth = 256, mixinStandardHelpOptions = true, versionProvider = VersionProvider.class)
 public class WgetHstsDatabaseUpdater implements Callable<Integer> {
 
 	public static void main(final String... args) {
