@@ -37,7 +37,7 @@ java -jar wget-update-hsts-database.jar ~/.wget-hsts https://github.com/chromium
 ### Output
 
 ```
-Downloading 'https://cs.chromium.org/codesearch/f/chromium/src/net/http/transport_security_state_static.json'... 10454 kB fetched
+Downloading 'https://github.com/chromium/chromium/raw/master/net/http/transport_security_state_static.json'... 10454 kB fetched
 Parsing source file '/tmp/hsts-1508536545025252107.json'... 96703 entries found
 Parsing destination file '/home/pi/.wget-hsts'... 90899 entries found
 Computing entries to delete... 559
