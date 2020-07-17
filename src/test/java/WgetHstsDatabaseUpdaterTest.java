@@ -329,8 +329,7 @@ class WgetHstsDatabaseUpdaterTest {
 
 	@Test
 	void testBuildInfo() {
-		Assertions.assertNotEquals(0, BuildInfo.getProperties().size());
-
+		Assertions.assertNotEquals(0, BuildInfo.INSTANCE.getProperties().size());
 	}
 
 	private void testExecute(final String source) throws IOException {
