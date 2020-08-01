@@ -21,8 +21,6 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: git fetch --unshallow && mvn org.jacoco:jacoco-maven-plugin:prepare-agent verify sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=albertus82-github -B -V
     - if: matrix.os == 'ubuntu-latest' && matrix.java == '11'
-      uses: snyk/actions/node@master
+      uses: snyk/actions/maven-3-jdk-11@master
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        command: monitor
