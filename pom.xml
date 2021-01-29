@@ -19,7 +19,7 @@
 		<main.class>WgetHstsDatabaseUpdater</main.class>
 		<dependency.dir>lib</dependency.dir>
 		<lombok.version>1.18.16</lombok.version>
-		<picocli.version>4.5.2</picocli.version>
+		<picocli.version>4.6.1</picocli.version>
 		<maven.version.rules>${project.baseUri}/maven-version-rules.xml</maven.version.rules>
 		<project.build.outputTimestamp>${git.commit.time}</project.build.outputTimestamp>
 	</properties>
