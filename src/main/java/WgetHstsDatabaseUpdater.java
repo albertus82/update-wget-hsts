@@ -176,9 +176,9 @@ public class WgetHstsDatabaseUpdater implements Callable<Integer> {
 	}
 
 	Path createEmptyWgetHstsTempFile() throws IOException {
-		final FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"));
 		Path path;
 		try {
+			final FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"));
 			path = Files.createTempFile("wget-hsts-", null, attr);
 		}
 		catch (final UnsupportedOperationException e) {
@@ -218,9 +218,9 @@ public class WgetHstsDatabaseUpdater implements Callable<Integer> {
 	}
 
 	Path createChromiumHstsPreloadedJsonTempFile(@NonNull final InputStream in) throws IOException {
-		final FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"));
 		Path path;
 		try {
+			final FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"));
 			path = Files.createTempFile("hsts-", ".json", attr);
 		}
 		catch (final UnsupportedOperationException e) {
