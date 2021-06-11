@@ -13,6 +13,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -173,7 +176,15 @@ public class WgetHstsDatabaseUpdater implements Callable<Integer> {
 	}
 
 	Path createEmptyWgetHstsTempFile() throws IOException {
-		final Path path = Files.createTempFile("wget-hsts-", null);
+		final FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"));
+		Path path;
+		try {
+			path = Files.createTempFile("wget-hsts-", null, attr);
+		}
+		catch (final UnsupportedOperationException e) {
+			log.log(Level.FINE, e.toString(), e);
+			path = Files.createTempFile("wget-hsts-", null);
+		}
 		return Files.write(path, Arrays.asList("# HSTS 1.0 Known Hosts database for GNU Wget.", "# Edit at your own risk.", "# <hostname>\t<port>\t<incl. subdomains>\t<created>\t<max-age>"), StandardOpenOption.APPEND);
 	}
 
@@ -207,7 +218,14 @@ public class WgetHstsDatabaseUpdater implements Callable<Integer> {
 	}
 
 	Path createChromiumHstsPreloadedJsonTempFile(@NonNull final InputStream in) throws IOException {
-		final Path path = Files.createTempFile("hsts-", ".json");
+		final FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"));
+		Path path;
+		try {
+			path = Files.createTempFile("hsts-", ".json", attr);
+		}
+		catch (final UnsupportedOperationException e) {
+			path = Files.createTempFile("hsts-", ".json");
+		}
 		Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
 		path.toFile().deleteOnExit();
 		return path;
