@@ -10,11 +10,10 @@ Import preloaded *HTTP Strict Transport Security* (HSTS) domains into GNU Wget.
 ## Minimum requirements
 
 * Java SE Development Kit 8
-* [Apache Maven](https://maven.apache.org) 3.3.x
 
 ## Build
 
-`mvn clean verify`
+`./mvnw clean verify`
 
 ## Usage
 
