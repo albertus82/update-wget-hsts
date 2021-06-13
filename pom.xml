@@ -7,7 +7,7 @@
 
 	<groupId>it.albertus</groupId>
 	<artifactId>wget-update-hsts-database</artifactId>
-	<version>0.1.3</version>
+	<version>0.1.2</version>
 
 	<name>Wget Update HSTS Database</name>
 	<url>https://github.com/albertus82/wget-update-hsts-database</url>
