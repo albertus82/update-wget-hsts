@@ -11,6 +11,7 @@
 
 	<name>Wget Update HSTS Database</name>
 	<url>https://github.com/albertus82/wget-update-hsts-database</url>
+	<description>Import preloaded HTTP Strict Transport Security (HSTS) domains into GNU Wget.</description>
 
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
