@@ -26,36 +26,13 @@
 
 	<profiles>
 		<profile>
-			<id>default</id>
+			<id>javac-release-option</id>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<jdk>[9,)</jdk>
 			</activation>
-		</profile>
-
-		<profile>
-			<id>delombok</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.projectlombok</groupId>
-						<artifactId>lombok-maven-plugin</artifactId>
-						<version>${lombok.version}.0</version>
-						<executions>
-							<execution>
-								<phase>generate-sources</phase>
-								<goals>
-									<goal>delombok</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
-							<addOutputDirectory>false</addOutputDirectory>
-							<verbose>true</verbose>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
+			<properties>
+				<maven.compiler.release>8</maven.compiler.release>
+			</properties>
 		</profile>
 	</profiles>
 
@@ -294,7 +271,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>1.7.31</version>
+			<version>1.7.32</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
