@@ -39,7 +39,6 @@ import org.gnu.wget.WgetHstsEntry;
 import com.google.gson.Gson;
 
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -56,7 +55,7 @@ import picocli.CommandLine.Parameters;
 public class WgetHstsDatabaseUpdater implements Callable<Integer> {
 
 	public static void main(final String... args) {
-		System.exit(new CommandLine(new WgetHstsDatabaseUpdater()).setCommandName(BuildInfo.INSTANCE.getProperties().getProperty("project.artifactId")).setOptionsCaseInsensitive(true).execute(args));
+		System.exit(new CommandLine(new WgetHstsDatabaseUpdater()).setCommandName(BuildInfo.getProperty("project.artifactId")).setOptionsCaseInsensitive(true).execute(args));
 	}
 
 	@Parameters(index = "0", description = "The 'wget-hsts' file to write/update.")
@@ -262,16 +261,15 @@ public class WgetHstsDatabaseUpdater implements Callable<Integer> {
 class VersionProvider implements IVersionProvider {
 	@Override
 	public String[] getVersion() {
-		return new String[] { "${COMMAND-FULL-NAME} v" + BuildInfo.INSTANCE.getProperties().getProperty("project.version") };
+		return new String[] { "${COMMAND-FULL-NAME} v" + BuildInfo.getProperty("project.version") };
 	}
 }
 
-@Getter
 enum BuildInfo {
 
 	INSTANCE;
 
-	private final Properties properties = new Properties();
+	final Properties properties = new Properties();
 
 	private BuildInfo() {
 		try (final InputStream is = getClass().getResourceAsStream("/META-INF/build-info.properties")) {
@@ -280,5 +278,9 @@ enum BuildInfo {
 		catch (final IOException e) {
 			throw new UncheckedIOException(e);
 		}
+	}
+
+	static String getProperty(@NonNull final String key) {
+		return INSTANCE.properties.getProperty(key);
 	}
 }
