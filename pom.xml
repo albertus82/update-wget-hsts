@@ -37,6 +37,9 @@
 
 		<profile>
 			<id>codeql</id>
+			<properties>
+				<delombok.outputDirectory>${project.build.directory}/generated-sources/delombok</delombok.outputDirectory>
+			</properties>
 			<build>
 				<plugins>
 					<plugin>
@@ -53,6 +56,7 @@
 						</executions>
 						<configuration>
 							<sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+							<outputDirectory>${delombok.outputDirectory}</outputDirectory>
 							<addOutputDirectory>false</addOutputDirectory>
 							<verbose>true</verbose>
 						</configuration>
@@ -66,8 +70,8 @@
 								<phase>process-sources</phase>
 								<configuration>
 									<target>
-										<copy todir="${project.build.sourceDirectory}" overwrite="true" verbose="true">
-											<fileset dir="${project.build.directory}/generated-sources/delombok" />
+										<copy overwrite="true" verbose="true" todir="${project.build.sourceDirectory}">
+											<fileset dir="${delombok.outputDirectory}" />
 										</copy>
 									</target>
 								</configuration>
