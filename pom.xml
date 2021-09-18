@@ -275,8 +275,7 @@
 						</goals>
 						<configuration>
 							<target>
-								<propertyfile file="lombok.config"
-									jdkproperties="true">
+								<propertyfile file="lombok.config" jdkproperties="true">
 									<entry key="config.stopBubbling" value="true" />
 									<entry key="lombok.addLombokGeneratedAnnotation" value="true" />
 								</propertyfile>
