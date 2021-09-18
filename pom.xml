@@ -18,7 +18,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<main.class>WgetHstsDatabaseUpdater</main.class>
 		<dependency.dir>lib</dependency.dir>
-		<lombok.version>1.18.20</lombok.version>
 		<picocli.version>4.6.1</picocli.version>
 		<maven.version.rules>${project.baseUri}/maven-version-rules.xml</maven.version.rules>
 		<project.build.outputTimestamp>${git.commit.time}</project.build.outputTimestamp>
@@ -229,7 +228,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>${lombok.version}</version>
+			<version>1.18.20</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -259,7 +258,7 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
-			<version>5.7.2</version>
+			<version>5.8.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
