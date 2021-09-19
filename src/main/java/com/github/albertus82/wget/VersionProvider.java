@@ -1,6 +1,4 @@
-package com.github.albertus82.wget.picocli;
-
-import com.github.albertus82.wget.util.BuildInfo;
+package com.github.albertus82.wget;
 
 import picocli.CommandLine.IVersionProvider;
 

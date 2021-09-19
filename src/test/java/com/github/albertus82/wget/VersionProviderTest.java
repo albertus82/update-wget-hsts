@@ -1,4 +1,4 @@
-package com.github.albertus82.wget.picocli;
+package com.github.albertus82.wget;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

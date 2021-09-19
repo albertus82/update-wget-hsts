@@ -36,8 +36,6 @@ import org.chromium.net.http.ChromiumHstsPreloadedEntry;
 import org.chromium.net.http.ChromiumHstsPreloadedList;
 import org.gnu.wget.WgetHstsEntry;
 
-import com.github.albertus82.wget.picocli.VersionProvider;
-import com.github.albertus82.wget.util.BuildInfo;
 import com.google.gson.Gson;
 
 import lombok.AccessLevel;
