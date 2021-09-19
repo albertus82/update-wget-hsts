@@ -1,3 +1,5 @@
+package com.github.albertus82.wget;
+
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.greaterThan;
 
@@ -46,18 +48,18 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @ExtendWith(MockServerExtension.class)
-class WgetHstsDatabaseUpdaterTest {
+class UpdateWgetHstsTest {
 
 	private static final String TRANSPORT_SECURITY_STATE_STATIC_JSON = "transport_security_state_static.json";
 	private static final String WGET_HSTS = "wget-hsts";
 
 	private static final Collection<Path> tempFiles = new TreeSet<>();
 
-	private static WgetHstsDatabaseUpdater instance;
+	private static UpdateWgetHsts instance;
 
 	@BeforeAll
 	static void beforeAll() {
-		instance = new WgetHstsDatabaseUpdater();
+		instance = new UpdateWgetHsts();
 	}
 
 	@AfterAll
@@ -216,7 +218,7 @@ class WgetHstsDatabaseUpdaterTest {
 	@Test
 	void testRetrieveSourceFileLocal() throws IOException {
 		final Path tempFile = createTempFileFromResource('/' + TRANSPORT_SECURITY_STATE_STATIC_JSON);
-		final WgetHstsDatabaseUpdater.SourceFile x = instance.retrieveSourceFile(tempFile.toString());
+		final SourceFile x = instance.retrieveSourceFile(tempFile.toString());
 		Assertions.assertFalse(x.isTemp());
 		Assertions.assertEquals(tempFile, x.getPath());
 	}
@@ -234,14 +236,14 @@ class WgetHstsDatabaseUpdaterTest {
 
 		final InetSocketAddress remoteAddress = client.remoteAddress();
 
-		WgetHstsDatabaseUpdater.SourceFile sf1 = instance.retrieveSourceFile(new URI("http", null, remoteAddress.getHostString(), remoteAddress.getPort(), uncompressedPath, null, null).toString());
+		SourceFile sf1 = instance.retrieveSourceFile(new URI("http", null, remoteAddress.getHostString(), remoteAddress.getPort(), uncompressedPath, null, null).toString());
 		Assertions.assertNotNull(sf1);
 		Assertions.assertTrue(sf1.isTemp());
 		final ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
 		Files.copy(sf1.getPath(), baos1);
 		Assertions.assertEquals(uncompressedResponseBody, baos1.toString(StandardCharsets.UTF_8.name()));
 
-		WgetHstsDatabaseUpdater.SourceFile sf2 = instance.retrieveSourceFile(new URI("http", null, remoteAddress.getHostString(), remoteAddress.getPort(), compressedPath, null, null).toString());
+		SourceFile sf2 = instance.retrieveSourceFile(new URI("http", null, remoteAddress.getHostString(), remoteAddress.getPort(), compressedPath, null, null).toString());
 		Assertions.assertNotNull(sf2);
 		Assertions.assertTrue(sf2.isTemp());
 		final ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
@@ -318,18 +320,6 @@ class WgetHstsDatabaseUpdaterTest {
 			final Path y = createTempFileFromResource('/' + TRANSPORT_SECURITY_STATE_STATIC_JSON);
 			Assertions.assertEquals(Files.size(y), Files.size(x));
 		}
-	}
-
-	@Test
-	void testVersionProvider() {
-		final VersionProvider vp = new VersionProvider();
-		Assertions.assertNotEquals(0, vp.getVersion().length);
-
-	}
-
-	@Test
-	void testBuildInfo() {
-		Assertions.assertNotEquals(0, BuildInfo.INSTANCE.properties.size());
 	}
 
 	private void testExecute(final String source) throws IOException {

@@ -1,9 +1,10 @@
+package com.github.albertus82.wget;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -21,7 +22,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
@@ -36,26 +36,26 @@ import org.chromium.net.http.ChromiumHstsPreloadedEntry;
 import org.chromium.net.http.ChromiumHstsPreloadedList;
 import org.gnu.wget.WgetHstsEntry;
 
+import com.github.albertus82.wget.picocli.VersionProvider;
+import com.github.albertus82.wget.util.BuildInfo;
 import com.google.gson.Gson;
 
 import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.SneakyThrows;
-import lombok.Value;
 import lombok.extern.java.Log;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.IVersionProvider;
 import picocli.CommandLine.Parameters;
 
 @Log
-@SuppressWarnings("java:S106") // "Standard outputs should not be used directly to log anything"
+@SuppressWarnings("java:S106") // Replace this use of System.out or System.err by a logger. Standard outputs should not be used directly to log anything (java:S106)
 @Command(description = "Import preloaded HTTP Strict Transport Security (HSTS) domains into GNU Wget.", footer = "Typical usage: java -jar ${COMMAND-FULL-NAME}.jar ~/.wget-hsts https://github.com/chromium/chromium/raw/master/net/http/transport_security_state_static.json", usageHelpWidth = 256, mixinStandardHelpOptions = true, versionProvider = VersionProvider.class)
-public class WgetHstsDatabaseUpdater implements Callable<Integer> {
+public class UpdateWgetHsts implements Callable<Integer> {
 
 	public static void main(final String... args) {
-		System.exit(new CommandLine(new WgetHstsDatabaseUpdater()).setCommandName(BuildInfo.getProperty("project.artifactId")).setOptionsCaseInsensitive(true).execute(args));
+		System.exit(new CommandLine(new UpdateWgetHsts()).setCommandName(BuildInfo.getProperty("project.artifactId")).setOptionsCaseInsensitive(true).execute(args));
 	}
 
 	@Parameters(index = "0", description = "The 'wget-hsts' file to write/update.")
@@ -68,7 +68,7 @@ public class WgetHstsDatabaseUpdater implements Callable<Integer> {
 
 	@Override
 	public Integer call() throws IOException {
-		new WgetHstsDatabaseUpdater().execute(destination, source);
+		new UpdateWgetHsts().execute(destination, source);
 		return 0;
 	}
 
@@ -251,36 +251,4 @@ public class WgetHstsDatabaseUpdater implements Callable<Integer> {
 		writer.newLine();
 	}
 
-	@Value
-	static class SourceFile {
-		Path path;
-		boolean temp;
-	}
-}
-
-class VersionProvider implements IVersionProvider {
-	@Override
-	public String[] getVersion() {
-		return new String[] { "${COMMAND-FULL-NAME} v" + BuildInfo.getProperty("project.version") };
-	}
-}
-
-enum BuildInfo {
-
-	INSTANCE;
-
-	final Properties properties = new Properties();
-
-	private BuildInfo() {
-		try (final InputStream is = getClass().getResourceAsStream("/META-INF/build-info.properties")) {
-			properties.load(is);
-		}
-		catch (final IOException e) {
-			throw new UncheckedIOException(e);
-		}
-	}
-
-	static String getProperty(@NonNull final String key) {
-		return INSTANCE.properties.getProperty(key);
-	}
 }
