@@ -44,6 +44,7 @@ import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import lombok.Value;
 import lombok.extern.java.Log;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -249,6 +250,12 @@ public class UpdateWgetHsts implements Callable<Integer> {
 	private void writeLine(@NonNull final BufferedWriter writer, @NonNull final String line) {
 		writer.write(line);
 		writer.newLine();
+	}
+
+	@Value
+	class SourceFile {
+		Path path;
+		boolean temp;
 	}
 
 }
