@@ -8,7 +8,7 @@ public class VersionProvider implements IVersionProvider {
 
 	@Override
 	public String[] getVersion() {
-		return new String[] { "${COMMAND-FULL-NAME} v" + BuildInfo.getProperty("project.version") };
+		return new String[] { "${COMMAND-FULL-NAME} " + BuildInfo.getProperty("project.version") };
 	}
 
 }
