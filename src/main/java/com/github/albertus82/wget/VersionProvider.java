@@ -1,6 +1,6 @@
 package com.github.albertus82.wget;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -24,7 +24,7 @@ public class VersionProvider implements IVersionProvider {
 		}
 		catch (final RuntimeException e) {
 			log.log(Level.FINE, "Invalid version timestamp, falling back to current datetime:", e);
-			return Instant.now();
+			return LocalDateTime.now();
 		}
 	}
 
