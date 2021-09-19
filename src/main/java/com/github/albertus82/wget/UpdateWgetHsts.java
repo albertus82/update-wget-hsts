@@ -48,6 +48,7 @@ import lombok.Value;
 import lombok.extern.java.Log;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.ExitCode;
 import picocli.CommandLine.Parameters;
 
 @Log
@@ -70,7 +71,7 @@ public class UpdateWgetHsts implements Callable<Integer> {
 	@Override
 	public Integer call() throws IOException {
 		new UpdateWgetHsts().execute(destination, source);
-		return 0;
+		return ExitCode.OK;
 	}
 
 	void execute(@NonNull final Path destinationPath, @NonNull final String source) throws IOException {
