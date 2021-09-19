@@ -1,6 +1,7 @@
 package com.github.albertus82.wget;
 
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.time.temporal.TemporalAccessor;
@@ -14,7 +15,7 @@ public class VersionProvider implements IVersionProvider {
 
 	@Override
 	public String[] getVersion() {
-		return new String[] { "${COMMAND-FULL-NAME} " + BuildInfo.getProperty("project.version") + " (" + DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(getVersionTimestamp()) + ')' };
+		return new String[] { "${COMMAND-FULL-NAME} " + BuildInfo.getProperty("project.version") + " (" + DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withZone(ZoneOffset.UTC).format(getVersionTimestamp()) + ')' };
 	}
 
 	private static TemporalAccessor getVersionTimestamp() {
