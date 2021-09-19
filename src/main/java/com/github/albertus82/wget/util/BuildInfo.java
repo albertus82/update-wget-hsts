@@ -5,9 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.Properties;
+import java.util.logging.Level;
 
 import lombok.NonNull;
+import lombok.extern.java.Log;
 
+@Log
 public enum BuildInfo {
 
 	INSTANCE;
@@ -36,7 +39,11 @@ public enum BuildInfo {
 	 * @return the value in this property list with the specified key value.
 	 */
 	public static String getProperty(@NonNull final String key) {
-		return INSTANCE.properties.getProperty(key);
+		final String value = INSTANCE.properties.getProperty(key);
+		if (value == null) {
+			log.log(Level.WARNING, "Missing property for key: \"{0}\".", key);
+		}
+		return value;
 	}
 
 }
