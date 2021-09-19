@@ -11,6 +11,7 @@ class BuildInfoTest {
 	void testBuildInfo() {
 		Assertions.assertNotEquals(0, BuildInfo.INSTANCE.properties.size());
 		Assertions.assertNull(BuildInfo.getProperty(UUID.randomUUID().toString()));
+		Assertions.assertThrows(NullPointerException.class, () -> BuildInfo.getProperty(null));
 	}
 
 }
