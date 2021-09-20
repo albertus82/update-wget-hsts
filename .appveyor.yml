@@ -1,3 +1,5 @@
+image: Visual Studio 2019
+
 version: '{build}'
 
 clone_depth: 50
@@ -8,8 +10,6 @@ environment:
       JAVA_HOME: ${ProgramFiles(x86)}\Java\jdk1.8.0
     - platform: x64
       JAVA_HOME: $(ProgramFiles)\Java\jdk1.8.0
-    - platform: x64
-      JAVA_HOME: $(ProgramFiles)\Java\jdk11
 
 build_script:
-  - mvn clean verify -V
+  - mvn clean verify -B -V -e -ntp
