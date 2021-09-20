@@ -347,7 +347,7 @@
 								<delete file="${checksums.file}" />
 								<checksum algorithm="SHA-256" todir="${checksums.directory}" forceoverwrite="yes" fileext=".sha256" pattern="* {1}&#13;&#10;[`{0}`](https://www.virustotal.com/it/file/{0}/analysis/)">
 									<fileset dir="${project.build.directory}">
-										<include name="*" />
+										<include name="*.tar.gz" />
 									</fileset>
 								</checksum>
 								<echo file="${checksums.file}" message="### Checksums SHA-256&#13;&#10;" />
