@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <assembly xmlns="http://maven.apache.org/ASSEMBLY/2.1.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.1.0 https://maven.apache.org/xsd/assembly-2.1.0.xsd">
@@ -12,14 +13,6 @@
 
 	<baseDirectory>${project.build.finalName}</baseDirectory>
 
-	<dependencySets>
-		<dependencySet>
-			<scope>runtime</scope>
-			<outputDirectory>${dependencies.directory}</outputDirectory>
-			<useProjectArtifact>false</useProjectArtifact>
-		</dependencySet>
-	</dependencySets>
-
 	<files>
 		<file>
 			<source>${project.build.directory}/${project.build.finalName}.${project.packaging}</source>
@@ -28,6 +21,10 @@
 	</files>
 
 	<fileSets>
+		<fileSet>
+			<directory>${project.build.directory}/${dependencies.directory}</directory>
+			<outputDirectory>${dependencies.directory}</outputDirectory>
+		</fileSet>
 		<fileSet>
 			<directory>${project.basedir}</directory>
 			<includes>
