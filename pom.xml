@@ -267,6 +267,7 @@
 						</goals>
 						<configuration>
 							<includeScope>runtime</includeScope>
+							<useBaseVersion>false</useBaseVersion>
 							<outputDirectory>${project.build.directory}/${dependencies.directory}</outputDirectory>
 						</configuration>
 					</execution>
