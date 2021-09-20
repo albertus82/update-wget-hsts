@@ -43,6 +43,16 @@
 			<outputDirectory>${thirdparty.license.directory}</outputDirectory>
 			<lineEnding>lf</lineEnding>
 		</fileSet>
+		<fileSet>
+			<directory>src/main/bin</directory>
+			<includes>
+				<include>*.sh</include>
+			</includes>
+			<outputDirectory>./</outputDirectory>
+			<filtered>true</filtered>
+			<lineEnding>lf</lineEnding>
+			<fileMode>0755</fileMode>
+		</fileSet>
 	</fileSets>
 
 </assembly>
