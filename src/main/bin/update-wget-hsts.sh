@@ -10,4 +10,4 @@ while [ -h "$PRG" ]; do
   fi
 done
 PRGDIR=`dirname "$PRG"`
-java -Xms16m -Xmx64m -jar "$PRGDIR/${project.build.finalName}.${project.packaging}" "$@"
+java -jar "$PRGDIR/${project.build.finalName}.${project.packaging}" "$@"
