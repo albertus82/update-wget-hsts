@@ -1,7 +1,6 @@
 package com.github.albertus82.wget;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.time.temporal.TemporalAccessor;
@@ -15,7 +14,7 @@ public class VersionProvider implements IVersionProvider {
 
 	@Override
 	public String[] getVersion() {
-		return new String[] { "${COMMAND-FULL-NAME} " + BuildInfo.getProperty("project.version") + " (" + DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withZone(ZoneOffset.UTC).format(getVersionTimestamp()) + ')' };
+		return new String[] { "${COMMAND-FULL-NAME} " + BuildInfo.getProperty("project.version") + " (" + DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(getVersionTimestamp()) + ')' };
 	}
 
 	private static TemporalAccessor getVersionTimestamp() {
@@ -24,7 +23,7 @@ public class VersionProvider implements IVersionProvider {
 		}
 		catch (final RuntimeException e) {
 			log.log(Level.FINE, "Invalid version timestamp, falling back to current datetime:", e);
-			return LocalDateTime.now();
+			return ZonedDateTime.now();
 		}
 	}
 

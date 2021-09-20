@@ -17,7 +17,8 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<main.class>com.github.albertus82.wget.UpdateWgetHsts</main.class>
-		<dependency.dir>lib</dependency.dir>
+		<dependencies.directory>lib</dependencies.directory>
+		<thirdparty.license.directory>3rdparty</thirdparty.license.directory>
 		<lombok.version>1.18.20</lombok.version>
 		<picocli.version>4.6.1</picocli.version>
 		<maven.version.rules>${project.baseUri}/maven-version-rules.xml</maven.version.rules>
@@ -122,6 +123,15 @@
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 			</resource>
+			<resource>
+				<directory>${project.basedir}</directory>
+				<includes>
+					<include>LICENSE*</include>
+					<include>NOTICE*</include>
+					<include>README*</include>
+				</includes>
+				<targetPath>META-INF</targetPath>
+			</resource>
 		</resources>
 
 		<plugins>
@@ -131,15 +141,28 @@
 				<version>4.0.5</version>
 				<executions>
 					<execution>
+						<id>zoned</id>
 						<goals>
 							<goal>revision</goal>
 						</goals>
 						<phase>initialize</phase>
+						<configuration>
+							<prefix>zoned.git</prefix>
+							<dateFormat>yyyy-MM-dd'T'HH:mm:ssXXX</dateFormat>
+						</configuration>
+					</execution>
+					<execution>
+						<id>local</id>
+						<goals>
+							<goal>revision</goal>
+						</goals>
+						<phase>initialize</phase>
+						<configuration>
+							<prefix>local.git</prefix>
+							<dateFormat>yyyy-MM-dd'T'HH:mm:ss'Z'</dateFormat>
+						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<dateFormat>yyyy-MM-dd'T'HH:mm:ss'Z'</dateFormat>
-				</configuration>
 			</plugin>
 
 			<plugin>
@@ -209,12 +232,13 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.2.0</version>
 				<configuration>
+					<outputTimestamp>${local.git.commit.time}</outputTimestamp>
 					<archive>
 						<manifest>
 							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							<mainClass>${main.class}</mainClass>
 							<addClasspath>true</addClasspath>
-							<classpathPrefix>${dependency.dir}/</classpathPrefix>
+							<classpathPrefix>${dependencies.directory}/</classpathPrefix>
 						</manifest>
 						<manifestEntries>
 							<X-Compile-Source-JDK>${maven.compiler.source}</X-Compile-Source-JDK>
@@ -237,8 +261,29 @@
 						</goals>
 						<configuration>
 							<includeScope>runtime</includeScope>
-							<outputDirectory>${project.build.directory}/${dependency.dir}</outputDirectory>
+							<outputDirectory>${project.build.directory}/${dependencies.directory}</outputDirectory>
 						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.3.0</version>
+				<configuration>
+					<outputTimestamp>${zoned.git.commit.time}</outputTimestamp>
+					<finalName>${project.artifactId}-${project.version}</finalName>
+					<descriptors>
+						<descriptor>src/assembly/assembly.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>
@@ -262,6 +307,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
