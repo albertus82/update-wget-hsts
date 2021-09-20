@@ -78,7 +78,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-antrun-plugin</artifactId>
-						<version>3.0.0</version>
 						<executions>
 							<execution>
 								<id>replace-sources</id>
@@ -134,6 +133,26 @@
 			</resource>
 		</resources>
 
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>3.0.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.8.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.22.2</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
 		<plugins>
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
@@ -163,18 +182,6 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.2</version>
 			</plugin>
 
 			<plugin>
@@ -311,7 +318,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
-				<version>3.0.0</version>
 				<executions>
 					<execution>
 						<id>lombok-config</id>
@@ -328,6 +334,30 @@
 							</target>
 						</configuration>
 						<?m2e execute?>
+					</execution>
+					<execution>
+						<phase>integration-test</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<property name="checksums.file" value="${project.build.directory}/checksums.md" />
+								<property name="checksums.directory" value="${project.build.directory}/checksums" />
+								<delete file="${checksums.file}" />
+								<checksum algorithm="SHA-256" todir="${checksums.directory}" forceoverwrite="yes" fileext=".sha256" pattern="* {1}&#13;&#10;[`{0}`](https://www.virustotal.com/it/file/{0}/analysis/)">
+									<fileset dir="${project.build.directory}">
+										<include name="*" />
+									</fileset>
+								</checksum>
+								<echo file="${checksums.file}" message="### Checksums SHA-256&#13;&#10;" />
+								<concat destfile="${checksums.file}" append="true">
+									<fileset dir="${checksums.directory}" />
+								</concat>
+								<loadfile property="checksums.file.contents" srcFile="${checksums.file}" />
+								<echo level="info" message="${checksums.file.contents}" />
+							</target>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
