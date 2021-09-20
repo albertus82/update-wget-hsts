@@ -22,7 +22,6 @@
 		<lombok.version>1.18.20</lombok.version>
 		<picocli.version>4.6.1</picocli.version>
 		<maven.version.rules>${project.baseUri}/maven-version-rules.xml</maven.version.rules>
-		<project.build.outputTimestamp>${git.commit.time}</project.build.outputTimestamp>
 	</properties>
 
 	<profiles>
