@@ -83,6 +83,10 @@
 								<phase>process-sources</phase>
 								<configuration>
 									<target>
+										<tstamp>
+											<format property="tstamp.backup" pattern="yyyy-MM-dd_HH.mm.ss.SSS" />
+										</tstamp>
+										<zip destfile="${project.build.sourceDirectory}_${tstamp.backup}.zip" basedir="${project.build.sourceDirectory}" level="9" />
 										<copy overwrite="true" verbose="true" todir="${project.build.sourceDirectory}">
 											<fileset dir="${lombok.outputDirectory}" />
 										</copy>
@@ -97,6 +101,10 @@
 								<phase>process-test-sources</phase>
 								<configuration>
 									<target>
+										<tstamp>
+											<format property="tstamp.backup.test" pattern="yyyy-MM-dd_HH.mm.ss.SSS" />
+										</tstamp>
+										<zip destfile="${project.build.testSourceDirectory}_${tstamp.backup.test}.zip" basedir="${project.build.testSourceDirectory}" level="9" />
 										<copy overwrite="true" verbose="true" todir="${project.build.testSourceDirectory}">
 											<fileset dir="${lombok.testOutputDirectory}" />
 										</copy>
