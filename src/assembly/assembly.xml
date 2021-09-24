@@ -42,9 +42,6 @@
 		</fileSet>
 		<fileSet>
 			<directory>src/main/bin</directory>
-			<includes>
-				<include>*.sh</include>
-			</includes>
 			<outputDirectory>./</outputDirectory>
 			<filtered>true</filtered>
 			<lineEnding>lf</lineEnding>
