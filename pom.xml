@@ -19,7 +19,7 @@
 		<main.class>com.github.albertus82.wget.UpdateWgetHsts</main.class>
 		<dependencies.directory>lib</dependencies.directory>
 		<thirdparty.license.directory>3rdparty</thirdparty.license.directory>
-		<lombok.version>1.18.22</lombok.version>
+		<lombok.version>1.18.20</lombok.version>
 		<picocli.version>4.6.1</picocli.version>
 		<maven.version.rules>${project.baseUri}/maven-version-rules.xml</maven.version.rules>
 	</properties>
