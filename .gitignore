@@ -1,6 +1,11 @@
-/target/
+*.versionsBackup
 .classpath
+.DS_Store
+.factorypath
 .project
 .settings/
 /bin/
+/target/
+hs_err_pid*.log
+junit*.properties
 lombok.config
