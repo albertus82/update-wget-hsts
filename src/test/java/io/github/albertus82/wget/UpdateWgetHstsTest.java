@@ -1,4 +1,4 @@
-package com.github.albertus82.wget;
+package io.github.albertus82.wget;
 
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.greaterThan;
@@ -44,8 +44,7 @@ import org.mockserver.model.JsonBody;
 import org.mockserver.model.MediaType;
 import org.mockserver.model.StringBody;
 
-import com.github.albertus82.wget.UpdateWgetHsts.SourceFile;
-
+import io.github.albertus82.wget.UpdateWgetHsts.SourceFile;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

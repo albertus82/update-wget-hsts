@@ -1,4 +1,4 @@
-package com.github.albertus82.wget;
+package io.github.albertus82.wget;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

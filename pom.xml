@@ -5,7 +5,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.github.albertus82</groupId>
+	<groupId>io.github.albertus82</groupId>
 	<artifactId>update-wget-hsts</artifactId>
 	<version>0.2.0</version>
 	<name>Update Wget HSTS</name>
@@ -16,7 +16,7 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<main.class>com.github.albertus82.wget.UpdateWgetHsts</main.class>
+		<main.class>${project.groupId}.wget.UpdateWgetHsts</main.class>
 		<dependencies.directory>lib</dependencies.directory>
 		<thirdparty.license.directory>3rdparty</thirdparty.license.directory>
 		<lombok.version>1.18.20</lombok.version>
