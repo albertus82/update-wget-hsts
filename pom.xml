@@ -24,6 +24,19 @@
 		<maven.version.rules>${project.baseUri}/maven-version-rules.xml</maven.version.rules>
 	</properties>
 
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>https://opensource.org/licenses/MIT</url>
+		</license>
+	</licenses>
+
+	<scm>
+		<connection>scm:git:https://github.com/albertus82/update-wget-hsts.git</connection>
+		<developerConnection>scm:git:https://github.com/albertus82/update-wget-hsts.git</developerConnection>
+		<url>https://github.com/albertus82/update-wget-hsts</url>
+	</scm>
+
 	<profiles>
 		<profile>
 			<id>javac-release-option</id>

@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2021 com.github.albertus82
+Copyright (c) 2021 io.github.albertus82
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
