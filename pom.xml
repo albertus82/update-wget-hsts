@@ -7,22 +7,10 @@
 
 	<groupId>io.github.albertus82</groupId>
 	<artifactId>update-wget-hsts</artifactId>
-	<version>0.2.0</version>
+	<version>0.2.1</version>
 	<name>Update Wget HSTS</name>
 	<url>https://github.com/albertus82/update-wget-hsts</url>
 	<description>Import preloaded HTTP Strict Transport Security (HSTS) domains into GNU Wget.</description>
-
-	<properties>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<main.class>${project.groupId}.wget.UpdateWgetHsts</main.class>
-		<dependencies.directory>lib</dependencies.directory>
-		<thirdparty.license.directory>3rdparty</thirdparty.license.directory>
-		<lombok.version>1.18.20</lombok.version>
-		<picocli.version>4.6.2</picocli.version>
-		<maven.version.rules>${project.baseUri}/maven-version-rules.xml</maven.version.rules>
-	</properties>
 
 	<licenses>
 		<license>
@@ -36,6 +24,19 @@
 		<developerConnection>scm:git:https://github.com/albertus82/update-wget-hsts.git</developerConnection>
 		<url>https://github.com/albertus82/update-wget-hsts</url>
 	</scm>
+
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<main.class>${project.groupId}.wget.UpdateWgetHsts</main.class>
+		<dependencies.directory>lib</dependencies.directory>
+		<thirdparty.license.directory>3rdparty</thirdparty.license.directory>
+		<lombok.version>1.18.20</lombok.version>
+		<picocli.version>4.6.2</picocli.version>
+		<maven.version.rules>${project.baseUri}/maven-version-rules.xml</maven.version.rules>
+		<project.build.outputTimestamp>${git.commit.time}</project.build.outputTimestamp>
+	</properties>
 
 	<profiles>
 		<profile>
@@ -63,7 +64,6 @@
 						<executions>
 							<execution>
 								<id>delombok</id>
-								<phase>generate-sources</phase>
 								<goals>
 									<goal>delombok</goal>
 								</goals>
@@ -73,7 +73,6 @@
 							</execution>
 							<execution>
 								<id>delombok-test</id>
-								<phase>generate-test-sources</phase>
 								<goals>
 									<goal>testDelombok</goal>
 								</goals>
@@ -176,33 +175,37 @@
 
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.1.0</version>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${project.basedir}</directory>
+							<includes>
+								<include>lombok.config</include>
+							</includes>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+
+			<plugin>
 				<groupId>pl.project13.maven</groupId>
 				<artifactId>git-commit-id-plugin</artifactId>
 				<version>4.0.5</version>
 				<executions>
 					<execution>
-						<id>zoned</id>
 						<goals>
 							<goal>revision</goal>
 						</goals>
 						<phase>initialize</phase>
-						<configuration>
-							<prefix>zoned.git</prefix>
-							<dateFormat>yyyy-MM-dd'T'HH:mm:ssXXX</dateFormat>
-						</configuration>
-					</execution>
-					<execution>
-						<id>local</id>
-						<goals>
-							<goal>revision</goal>
-						</goals>
-						<phase>initialize</phase>
-						<configuration>
-							<prefix>local.git</prefix>
-							<dateFormat>yyyy-MM-dd'T'HH:mm:ss'Z'</dateFormat>
-						</configuration>
 					</execution>
 				</executions>
+				<configuration>
+					<dateFormat>yyyy-MM-dd'T'HH:mm:ssXXX</dateFormat>
+					<dateFormatTimeZone>Z</dateFormatTimeZone>
+				</configuration>
 			</plugin>
 
 			<plugin>
@@ -223,7 +226,6 @@
 									<version>3.3.9</version>
 								</requireMavenVersion>
 							</rules>
-							<fail>true</fail>
 						</configuration>
 					</execution>
 				</executions>
@@ -231,7 +233,7 @@
 					<dependency>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>extra-enforcer-rules</artifactId>
-						<version>1.4</version>
+						<version>1.5.1</version>
 					</dependency>
 				</dependencies>
 			</plugin>
@@ -262,7 +264,6 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.2.0</version>
 				<configuration>
-					<outputTimestamp>${local.git.commit.time}</outputTimestamp>
 					<archive>
 						<manifest>
 							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
@@ -303,7 +304,6 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>3.3.0</version>
 				<configuration>
-					<outputTimestamp>${zoned.git.commit.time}</outputTimestamp>
 					<finalName>${project.artifactId}-${project.version}</finalName>
 					<descriptors>
 						<descriptor>src/assembly/assembly.xml</descriptor>
@@ -369,14 +369,12 @@
 								<property name="checksums.file" value="${project.build.directory}/checksums.md"/>
 								<property name="checksums.directory" value="${project.build.directory}/checksums"/>
 								<delete file="${checksums.file}"/>
-								<checksum algorithm="SHA-256" todir="${checksums.directory}" forceoverwrite="yes" fileext=".sha256" pattern="* {1}
-[`{0}`](https://www.virustotal.com/it/file/{0}/analysis/)">
+								<checksum algorithm="SHA-256" todir="${checksums.directory}" forceoverwrite="yes" fileext=".sha256" pattern="* {1}&#13;&#10;[`{0}`](https://www.virustotal.com/it/file/{0}/analysis/)">
 									<fileset dir="${project.build.directory}">
 										<include name="*.tar.gz"/>
 									</fileset>
 								</checksum>
-								<echo file="${checksums.file}" message="### Checksums SHA-256
-"/>
+								<echo file="${checksums.file}" message="### Checksums SHA-256&#13;&#10;"/>
 								<concat destfile="${checksums.file}" append="true">
 									<fileset dir="${checksums.directory}"/>
 								</concat>
@@ -433,7 +431,7 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
-			<version>5.8.1</version>
+			<version>5.8.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -451,7 +449,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>1.7.32</version>
+			<version>1.7.33</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

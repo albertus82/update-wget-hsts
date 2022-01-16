@@ -1,8 +1,7 @@
 Update Wget HSTS
 =========================
 
-[![Build Status](https://github.com/albertus82/update-wget-hsts/workflows/build/badge.svg)](https://github.com/albertus82/update-wget-hsts/actions)
-[![Build status](https://ci.appveyor.com/api/projects/status/github/albertus82/update-wget-hsts?branch=master&svg=true)](https://ci.appveyor.com/project/albertus82/update-wget-hsts)
+[![Build status](https://github.com/albertus82/extfix/update-wget-hsts/workflows/build.yml/badge.svg)](https://github.com/albertus82/update-wget-hsts/actions)
 [![Known Vulnerabilities](https://snyk.io/test/github/albertus82/update-wget-hsts/badge.svg?targetFile=pom.xml)](https://snyk.io/test/github/albertus82/update-wget-hsts?targetFile=pom.xml)
 
 Import preloaded *HTTP Strict Transport Security* (HSTS) domains into GNU Wget.

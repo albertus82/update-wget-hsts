@@ -11,7 +11,7 @@
 
 	<includeBaseDirectory>true</includeBaseDirectory>
 
-	<baseDirectory>${project.build.finalName}</baseDirectory>
+	<baseDirectory>${project.artifactId}-${project.version}</baseDirectory>
 
 	<files>
 		<file>

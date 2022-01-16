@@ -1,0 +1,29 @@
+name: Release
+
+on: 
+  push:
+    tags: v*
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      MAVEN_OPTS: -Dhttp.keepAlive=false
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-java@v2
+      with:
+        distribution: temurin
+        java-version: 17
+    - run: mvn clean verify -B -V -e -ntp
+    - uses: ncipollo/release-action@v1
+      with:
+        artifacts: target/*.tar.gz
+        bodyFile: target/checksums.md
+        token: ${{ secrets.GITHUB_TOKEN }}
+        draft: true
+        generateReleaseNotes: true
+    - run: for f in target/*.tar.gz; do echo "Submitting file $f to VirusTotal..." && sleep 15 && curl -v -F "file=@$f" -F apikey=${{ secrets.VT_API_KEY }} https://www.virustotal.com/vtapi/v2/file/scan && echo && echo "File $f submitted to VirusTotal."; done
