@@ -358,12 +358,14 @@
 								<property name="checksums.file" value="${project.build.directory}/checksums.md"/>
 								<property name="checksums.directory" value="${project.build.directory}/checksums"/>
 								<delete file="${checksums.file}"/>
-								<checksum algorithm="SHA-256" todir="${checksums.directory}" forceoverwrite="yes" fileext=".sha256" pattern="* {1}&#13;&#10;[`{0}`](https://www.virustotal.com/it/file/{0}/analysis/)">
+								<checksum algorithm="SHA-256" todir="${checksums.directory}" forceoverwrite="yes" fileext=".sha256" pattern="* {1}
+[`{0}`](https://www.virustotal.com/it/file/{0}/analysis/)">
 									<fileset dir="${project.build.directory}">
 										<include name="*.tar.gz"/>
 									</fileset>
 								</checksum>
-								<echo file="${checksums.file}" message="### Checksums SHA-256&#13;&#10;"/>
+								<echo file="${checksums.file}" message="### Checksums SHA-256
+"/>
 								<concat destfile="${checksums.file}" append="true">
 									<fileset dir="${checksums.directory}"/>
 								</concat>
@@ -397,7 +399,7 @@
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-			<version>2.9.0</version>
+			<version>2.9.1</version>
 		</dependency>
 		<dependency>
 			<groupId>info.picocli</groupId>
