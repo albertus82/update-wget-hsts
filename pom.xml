@@ -28,6 +28,7 @@
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.release>8</maven.compiler.release>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<main.class>${project.groupId}.wget.UpdateWgetHsts</main.class>
 		<dependencies.directory>lib</dependencies.directory>
@@ -39,16 +40,6 @@
 	</properties>
 
 	<profiles>
-		<profile>
-			<id>javac-release-option</id>
-			<activation>
-				<jdk>[9,)</jdk>
-			</activation>
-			<properties>
-				<maven.compiler.release>8</maven.compiler.release>
-			</properties>
-		</profile>
-
 		<profile>
 			<id>codeql</id>
 			<properties>
@@ -198,9 +189,9 @@
 			</plugin>
 
 			<plugin>
-				<groupId>pl.project13.maven</groupId>
-				<artifactId>git-commit-id-plugin</artifactId>
-				<version>4.0.5</version>
+				<groupId>io.github.git-commit-id</groupId>
+				<artifactId>git-commit-id-maven-plugin</artifactId>
+				<version>5.0.0</version>
 				<executions>
 					<execution>
 						<goals>
@@ -227,13 +218,16 @@
 						<configuration>
 							<rules>
 								<requireJavaVersion>
-									<version>${maven.compiler.source}</version>
+									<version>11</version>
 								</requireJavaVersion>
 								<requireMavenVersion>
 									<version>3.5.2</version>
 								</requireMavenVersion>
 								<enforceBytecodeVersion>
-									<maxJdkVersion>${maven.compiler.target}</maxJdkVersion>
+									<maxJdkVersion>${maven.compiler.release}</maxJdkVersion>
+									<ignoredScopes>
+										<ignoreScope>test</ignoreScope>
+									</ignoredScopes>
 								</enforceBytecodeVersion>
 							</rules>
 						</configuration>
@@ -255,6 +249,7 @@
 				<configuration>
 					<archive>
 						<manifest>
+							<addDefaultSpecificationEntries></addDefaultSpecificationEntries>
 							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							<mainClass>${main.class}</mainClass>
 							<addClasspath>true</addClasspath>
@@ -263,6 +258,7 @@
 						<manifestEntries>
 							<X-Compile-Source-JDK>${maven.compiler.source}</X-Compile-Source-JDK>
 							<X-Compile-Target-JDK>${maven.compiler.target}</X-Compile-Target-JDK>
+							<X-Compile-Release-JDK>${maven.compiler.release}</X-Compile-Release-JDK>
 						</manifestEntries>
 					</archive>
 				</configuration>
@@ -399,7 +395,7 @@
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-			<version>2.10</version>
+			<version>2.10.1</version>
 		</dependency>
 		<dependency>
 			<groupId>info.picocli</groupId>
