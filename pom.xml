@@ -33,7 +33,7 @@
 		<dependencies.directory>lib</dependencies.directory>
 		<thirdparty.license.directory>3rdparty</thirdparty.license.directory>
 		<lombok.version>1.18.26</lombok.version>
-		<picocli.version>4.7.1</picocli.version>
+		<picocli.version>4.7.2</picocli.version>
 		<maven.version.rules>${project.baseUri}/maven-version-rules.xml</maven.version.rules>
 		<project.build.outputTimestamp>${git.commit.time}</project.build.outputTimestamp>
 	</properties>
