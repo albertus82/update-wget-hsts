@@ -17,4 +17,5 @@ jobs:
       with:
         distribution: zulu
         java-version: ${{ matrix.java }}
+        cache: 'maven'
     - run: ./mvnw clean verify -B -V -e -ntp
